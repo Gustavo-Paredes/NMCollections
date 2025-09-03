@@ -3,6 +3,7 @@ body {
     margin: 0;
     background: #585e60;
     color: #333;
+    padding-top: 70px; /* Ajusta este valor según la altura del header */
 }
 
 
@@ -11,6 +12,11 @@ header {
     background: #222;
     padding: 0.5rem 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
 }
 
 .navbar-custom {
