@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+      {%  load static %}
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- bootstrap via cdn -->
+      <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp"
+          crossorigin="anonymous">
+      <!--  fuente iconos -->
+      <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+          />
+      <!-- css local -->
+      <link rel="stylesheet" href="{% static 'css/style.css' %}">
+      <link rel="stylesheet" href="{% static 'css/home.css' %}">
+      <!-- fuentes -->
+      <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Oswald">
+
+             <title>NMCollections</title>
+             <link rel="shortcut icon" href='{% static 'img/icons/logo_pag.svg' %}' type="image/x-icon">
+    </head> 
+
+<body>
+    <!-- Header-->
+    <header>
+        {% include 'header.html' %}
+    </header>
+    <!-- Carrusel -->
+    <div id="carouselNM" class="carousel slide" data-bs-ride="carousel"> <!-- Nombre del carrusel: carouselNM | Intrucciones para el bootstrap: carousel que se desliza | Activar el autoplay: carousel-->
+        
+        <!-- Inicio del carrusel -->
+        <div class="carousel-inner">
+
+        <!--Imagenes del carrusel-->
+        <div class="carousel-item active">
+          <img src="{% static 'img/carrusel/img1.jpg' %}" class="d-block w-100" alt="Imagen 1">
+        </div>
+
+        <div class="carousel-item">
+          <img src="{% static 'img/carrusel/img2.jpg' %}" class="d-block w-100" alt="Imagen 2">
+        </div>
+
+        <div class="carousel-item">
+          <img src="{% static 'img/carrusel/img3.jpg' %}" class="d-block w-100" alt="Imagen 3">
+        </div>
+      </div>
+      <!--Imagenes del carrusel-->
+
+
+      <!-- Controles del carrusel -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselNM" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+      </button>
+
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselNM" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Siguiente</span>
+      </button>
+      <!-- Controles del carrusel -->
+
+
+    </div>
+    <!-- Fin del Carrusel -->
+
+
+
+
+
+<footer>
+    {% include 'footer.html' %}
+</footer>
+
+
+    <!-- Scripts de Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
