@@ -1,29 +1,38 @@
-PROYECTO DE PORTAFOLIO DE TITULO
+# Proyecto de Portafolio de Título  
 
-CONTEXTO:
-nmcollections es una pyme que vende cartas colecionables de las cuales pueden ser personalizadas, ya presentado sus servicios a grandes equipos como puede ser EFC CONCHALI, PALESTINO y al equipo AUDAX,
-pero el cliente quiere que sus usuarios sientan confianza y presentar profesionalidad al momento de presentarse como negocio, tambien el unico medio de pago que puede aceptar el cliente es por medio
-de transferencias bancarias.          
+## 📌 Contexto  
+**NMCollections** es una pyme dedicada a la venta de cartas coleccionables, incluyendo la opción de personalizarlas.  
+La empresa ya ha presentado sus servicios a equipos como **EFC Conchalí**, **Palestino** y **Audax Italiano**.  
 
-Solucion:
-Se ideo en crear una pagina web para la solucion a esta complicaciones para que los usuarios tenga la sensacion de seguridad y profesionalismo al momento de elegir la coleccion de cartas que
-quiere adquirir el usuario, tambien como valor agregado al negocio se planteo la idea que dentro de la misma pagina los usuarios puedan crear sus propias cartas y tambien subastar las mismas cartas.
+El cliente busca transmitir **confianza y profesionalismo** en su presencia digital.  
+Actualmente, el único medio de pago disponible es **transferencia bancaria**, lo que limita la experiencia de compra.  
 
-Para acomodar a los usuarios del cliente y presentar el negocio de una manera mas profesional se ideo una pagina para que las
-personas puedan comprar cartas oficiales, pre-hechas y/o cartas personalizadas.
+---
 
-TECNOLOGIAS y HERRAMIENTAS:
-Las siguientes tecnologias se utilizan para este proyecto de titulo:
- ° Django
- ° Api de mercado pago
- ° SQL
+## 🎯 Solución Propuesta  
+Se desarrolló una **página web** que:  
+- Entrega una sensación de seguridad y profesionalismo al usuario.  
+- Permite comprar cartas oficiales, pre-hechas o personalizadas.  
+- Incluye como valor agregado la posibilidad de que los usuarios:  
+  - **Creen sus propias cartas**.  
+  - **Subasten sus cartas personalizadas**.  
 
-PROGRAMADORES:
-Gustavo Paredes
-Jeremy Contreras
+De esta forma, NMCollections puede presentar su negocio de manera más sólida y confiable, generando mayor alcance y confianza en sus clientes.  
 
-CLIENTE:
+---
 
-nmcollections
+## 🛠️ Tecnologías y Herramientas  
+- **Django**  
+- **API de Mercado Pago**  
+- **SQL**  
 
+---
 
+## 👨‍💻 Programadores  
+- Gustavo Paredes  
+- Jeremy Contreras  
+
+---
+
+## 👤 Cliente  
+**NMCollections**
