@@ -7,6 +7,10 @@ La empresa ya ha presentado sus servicios a equipos como **EFC Conchalí**, **Pa
 El cliente busca transmitir **confianza y profesionalismo** en su presencia digital.  
 Actualmente, el único medio de pago disponible es **transferencia bancaria**, lo que limita la experiencia de compra.  
 
+<p align="center">
+  <img src="nmcollections/static/img/icons/logo_pag.svg" alt="NMCollections Logo" width="200">
+</p>
+
 ---
 
 ## 🎯 Solución Propuesta  
