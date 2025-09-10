@@ -34,7 +34,8 @@ De esta forma, NMCollections puede presentar su negocio de manera más sólida y
 
 ## 👨‍💻 Programadores  
 - Gustavo Paredes: gu.paredes@duocuc.cl
-- Jeremy Contreras: je.contrerass@duocuc.cl  
+- Jeremy Contreras: je.contrerass@duocuc.cl
+- Matias Parada: m.parada@duocuc.cl
 
 ---
 
