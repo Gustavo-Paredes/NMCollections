@@ -17,7 +17,7 @@ Se desarrollar un **entorno virtual** que:
 - Entrega una sensación de seguridad y profesionalismo al usuario.  
 - Permite comprar cartas oficiales, pre-hechas o personalizadas.  
 - Incluye como valor agregado la posibilidad de que los usuarios:  
-  - **personalizar sus propias cartas**.  
+  - **La personalizacion de sus propias cartas**.  
   - **Interactuar con estas cartas atravez de QR o NFC**.
 - El cliente puede visualizar el estado de sus ventas y pedidos.
 - Chat integrado para el software de escritorio.  
