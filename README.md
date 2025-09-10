@@ -1,11 +1,10 @@
 # Proyecto de Portafolio de Título  
 
 ## 📌 Contexto  
-**NMCollections** es una pyme dedicada a la venta de cartas coleccionables, incluyendo la opción de personalizarlas.  
-La empresa ya ha presentado sus servicios a equipos como **EFC Conchalí**, **Palestino** y **Audax Italiano**.  
+*NMCollections* es un proyecto personal de un cliente que ha estado desarrollando diseños innovadores basados en jugadores de futbol mundiales, pero tambien ha ido adaptándose al mercado de su zona y comenzó a recurrir a la creación de cartas personalizadas para sus clientes, entre estos se encuentran clubes reconocidos en nuestro país, tales como *Colo Colo*, *Palestino*, *EFC Conchali*, etc. El proyecto tiene como objetivo darse a conocer, a través de un sitio web para generar un mayor alcance y profesionalismo para nuestro cliente.
 
-El cliente busca transmitir **confianza y profesionalismo** en su presencia digital.  
-Actualmente, el único medio de pago disponible es **transferencia bancaria**, lo que limita la experiencia de compra.  
+Por lo mencionado y pensando en la innovación tecnológica nuestro cliente de *NMCollections* está muy entusiasmado en desarrollar una página web para tener un perfil más atractivo dentro de este mercado, ya que como está en ascenso, y por nuestra investigación a nivel nacional sería una verdadera oportunidad de surgimiento, ya que no hay competencias reales en este tipo de negocios.
+  
 
 <p align="center">
   <img src="nmcollections/static/img/icons/logo_pag.svg" alt="NMCollections Logo" width="200">
