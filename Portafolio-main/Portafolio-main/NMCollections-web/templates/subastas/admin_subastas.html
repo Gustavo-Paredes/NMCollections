@@ -1,0 +1,99 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}NM Collections - Subastas{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/subastas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        {% if user.is_superuser %}
+        <!-- Columna izquierda: Crear subasta -->
+        <div class="col-12 col-lg-4 mb-4">
+            <div class="subasta-card">
+                <div class="subasta-title" style="font-size:1.3rem; text-align:center;">CREAR SUBASTA</div>
+                <form method="post" class="card-body crear-subasta-form rectangular-form">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <div class="form-group">
+                            {{ form.producto.label_tag }}
+                            {{ form.producto }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.precio_inicial.label_tag }}
+                            {{ form.precio_inicial }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.incremento_minimo.label_tag }}
+                            {{ form.incremento_minimo }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.precio_reserva.label_tag }}
+                            {{ form.precio_reserva }}
+                        </div>
+                        <div class="form-field">
+                            {{ form.fecha_inicio_fecha.label_tag }}
+                            {{ form.fecha_inicio_fecha }}
+                        </div>
+                        <div class="form-field">
+                            {{ form.fecha_inicio_hora.label_tag }}
+                            {{ form.fecha_inicio_hora }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="form-field">
+                            {{ form.fecha_fin_fecha.label_tag }}
+                            {{ form.fecha_fin_fecha }}
+                        </div>
+                        <div class="form-field">
+                            {{ form.fecha_fin_hora.label_tag }}
+                            {{ form.fecha_fin_hora }}
+                        </div>
+                    </div>
+                    <button type="submit" class="subasta-btn">Crear Subasta</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Columna derecha: Subastas activas -->
+        <div class="col-12 col-lg-8">
+            <h4 class="mb-4 subasta-title text-center">Subastas activas</h4>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-3">
+                {% for subasta in subastas %}
+                <div class="col d-flex align-items-stretch">
+                    <div class="subasta-card w-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="subasta-title">{{ subasta.producto.nombre }}</h5>
+                            <ul class="list-unstyled small mb-3">
+                                <li><strong>Estado:</strong> <span class="subasta-estado">{{ subasta.get_estado_display }}</span></li>
+                                <li><strong>Precio inicial:</strong> <span class="subasta-precio">${{ subasta.precio_inicial }}</span></li>
+                                <li><strong>Fecha inicio:</strong> <span class="subasta-fecha">{{ subasta.fecha_inicio|date:'d/m/Y H:i' }}</span></li>
+                                <li><strong>Fecha fin:</strong> <span class="subasta-fecha">{{ subasta.fecha_fin|date:'d/m/Y H:i' }}</span></li>
+                                <li><strong>Tiempo restante:</strong> <span class="subasta-contador" data-fecha-fin="{{ subasta.fecha_fin|date:'Y-m-d\\TH:i:s' }}"></span></li>
+                            </ul>
+                            <a href="{% url 'subastas:detalle' subasta.id %}" class="subasta-btn btn btn-sm mt-auto w-100">Ver detalles</a>
+                            {% if user.is_superuser %}
+                            <form method="post" action="{% url 'subastas:eliminar' subasta.id %}" >
+                                {% csrf_token %}
+                                <button type="submit" class="subasta-btn btn btn-sm mt-2 w-100" style="background:#b71c1c;">Eliminar</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <p>No hay subastas disponibles.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

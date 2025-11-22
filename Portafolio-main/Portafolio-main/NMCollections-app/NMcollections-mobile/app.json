@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "NMcollections-mobile",
+    "slug": "NMcollections-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mapowo.nmcollections",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "scheme": "nmcollections",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "linking": {
+      "prefixes": [
+        "nmcollections://",
+        "https://zkbc59xz-8000.brs.devtunnels.ms/NFC/"
+      ],
+      "config": {
+        "screens": {
+          "NFCReader": "NFC/:codigo_nfc"
+        }
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.NMcollectionsmobile",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "https",
+            "host": "zkbc59xz-8000.brs.devtunnels.ms",
+            "pathPrefix": "/NFC/"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5c3802fd-9729-44c1-8830-60a6fa824e57"
+      }
+    }
+  }
+}

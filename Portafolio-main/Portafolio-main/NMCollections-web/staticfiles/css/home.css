@@ -1,0 +1,353 @@
+/* Estilos específicos del body */
+body {
+    background: #585e60; 
+    color: #333;
+    padding-top: 70px;         /* Espacio para header fijo */
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Carrusel rectangular */
+#carouselNM {
+    height: 400px;        
+    border-radius: 10px;
+}
+
+#carouselNM .carousel-inner {
+    height: 100%;
+}
+
+#carouselNM .carousel-item {
+    align-items: center;       /* Centra verticalmente la imagen */
+    justify-content: center;   /* Centra horizontalmente */
+}
+
+#carouselNM .carousel-item img {
+    width: auto;           /* Mantiene proporción */
+    height: auto;          /* Mantiene proporción */
+    display: block;
+    margin: 0 auto;        /* Centra horizontalmente */
+}
+
+
+
+
+
+
+/* Contenedor centrado */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 70px); /* Ajusta si tienes header fijo */
+    background-color: #585e60; /* Gris de fondo */
+    padding: 20px;
+}
+
+/* Tarjeta principal */
+.login-card {
+    background: #2c2c2c;
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    width: 100%;
+    max-width: 400px;
+    color: #fff;
+    text-align: center;
+}
+
+/* Logo */
+.login-logo {
+    height: 60px;
+    margin-bottom: 15px;
+}
+
+/* Cabecera */
+.login-header h2 {
+    margin: 10px 0;
+    color: #00c853; /* Verde acento */
+}
+
+.login-header p {
+    font-size: 0.9rem;
+    color: #bfbfbf;
+}
+
+/* Formulario */
+.login-form {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #fff;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #00c853;
+    box-shadow: 0 0 5px #00c85366;
+}
+
+
+.toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #555;
+    font-size: 1rem;
+    padding: 0;
+}
+
+.toggle-password-btn:focus {
+    outline: none;
+}
+
+
+/* Checkbox */
+.checkbox-group input[type="checkbox"] {
+    width: 15px;   /* Ancho del checkbox */
+    height: 15px;  /* Alto del checkbox */
+}
+
+/* Ajustar espacio interno si es necesario */
+.checkbox-group label {
+    padding: 0;     /* Quita padding del label */
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+/* Separación entre checkbox y label */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;       /* Espacio entre checkbox y label */
+    margin-bottom: 20px;
+    line-height: 1;          /* Ajusta altura de línea */
+}
+
+/* Botón */
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: #00c853;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-login:hover {
+    background-color: #00e676;
+    transform: translateY(-2px);
+}
+
+/* Footer de la tarjeta */
+.login-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.login-footer p, .forgot-password {
+    font-size: 0.9rem;
+    color: #bfbfbf;
+}
+
+.login-footer a {
+    color: #00c853;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.login-footer a:hover {
+    color: #00e676;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 30px 20px;
+    }
+}
+
+
+
+
+
+
+
+
+/* === CONTENEDOR CENTRAL === */
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
+}
+
+/* === TARJETA DEL REGISTRO === */
+.register-card {
+    background: #2c2c2c;
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    width: 500px;
+    min-width: 0;
+}
+
+/* === CABECERA === */
+.register-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.register-header h2 {
+    color: #fff;
+    margin: 15px 0 5px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.register-header p {
+    color: #bfbfbf;
+    font-size: 0.95rem;
+}
+
+/* === FORMULARIO === */
+.register-form .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.register-form .form-group label {
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.register-form .form-group input {
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: none;
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.register-form .form-group input::placeholder {
+    color: #bfbfbf;
+}
+
+/* === ROW PARA INPUTS LADO A LADO === */
+.register-form .form-row {
+    display: flex;
+    gap: 15px;
+}
+
+/* === CHECKBOX === */
+.checkbox-group input[type="checkbox"] {
+    width: 15px;   /* Ancho del checkbox */
+    height: 15px;  /* Alto del checkbox */
+}
+
+/* Ajustar espacio interno si es necesario */
+.checkbox-group label {
+    padding: 0;     /* Quita padding del label */
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+/* Separación entre checkbox y label */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;       /* Espacio entre checkbox y label */
+    margin-bottom: 20px;
+    line-height: 1;          /* Ajusta altura de línea */
+}
+
+
+
+/* === BOTÓN === */
+.register-form .btn-primary {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #00c853;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.register-form .btn-primary:hover {
+    background-color: #00e676;
+}
+
+/* === FOOTER === */
+.register-footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #bfbfbf;
+    font-size: 0.9rem;
+}
+
+.register-footer a {
+    color: #00c853;
+    text-decoration: none;
+}
+
+.register-footer a:hover {
+    color: #00e676;
+}
+
+/* === RESPONSIVO === */
+@media (max-width: 500px) {
+    .register-card {
+        padding: 30px 20px;
+    }
+
+    .register-form .form-row {
+        flex-direction: column;
+    }
+}
+
+/* Checkbox de términos y condiciones alineado horizontalmente */
+.register-form .form-group.checkbox-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    line-height: 1;
+    display: flex;
+}
+.register-form .form-group.checkbox-group label {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0;
+}

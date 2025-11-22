@@ -1,0 +1,1 @@
+# API Móvil - Centraliza todos los endpoints del sistema

@@ -1,0 +1,290 @@
+-- =========================================
+-- MÓDULO USUARIO & SESIÓN
+-- =========================================
+
+CREATE TABLE Rol (
+    id_rol INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_rol VARCHAR(50) NOT NULL,
+    descripcion TEXT
+);
+
+CREATE TABLE Usuario (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido_paterno VARCHAR(50) NOT NULL,
+    apellido_materno VARCHAR(50),
+    correo VARCHAR(150) NOT NULL UNIQUE,
+    contrasena_hash VARCHAR(255) NOT NULL,
+    telefono VARCHAR(20),
+    direccion VARCHAR(255),
+    id_rol INT NOT NULL,
+    fecha_registro DATETIME DEFAULT NOW(),
+    estado ENUM('activo', 'inactivo', 'bloqueado', 'pendiente') DEFAULT 'activo',
+    FOREIGN KEY (id_rol) REFERENCES Rol(id_rol)
+);
+
+CREATE TABLE Sesion (
+    id_sesion INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    fecha_inicio DATETIME NOT NULL,
+    fecha_expiracion DATETIME NOT NULL,
+    ip_origen VARCHAR(45),
+    dispositivo ENUM('Web','Android','iOS'),
+    estado ENUM('activa','expirada','cerrada') DEFAULT 'activa',
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+-- =========================================
+-- MÓDULO PRODUCTO & CARRITO/PEDIDO
+-- =========================================
+
+CREATE TABLE Categoria_Producto (
+    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_categoria VARCHAR(100) NOT NULL,
+    descripcion TEXT
+);
+
+CREATE TABLE Producto (
+    id_producto INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    id_categoria INT NOT NULL,
+    precio_base DECIMAL(10,2) NOT NULL,
+    stock INT,
+    tipo_producto ENUM('estandar','personalizado','digital') NOT NULL,
+    imagen_referencia VARCHAR(255),
+    fecha_creacion DATETIME DEFAULT NOW(),
+    estado ENUM('activo','inactivo','descontinuado') DEFAULT 'activo',
+    FOREIGN KEY (id_categoria) REFERENCES Categoria_Producto(id_categoria)
+);
+
+CREATE TABLE Producto_Personalizacion (
+    id_personalizacion INT AUTO_INCREMENT PRIMARY KEY,
+    id_producto INT NOT NULL,
+    opcion_tipo ENUM('imagen','texto','color','estilo') NOT NULL,
+    valor VARCHAR(255) NOT NULL,
+    preview_url VARCHAR(255),
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto)
+);
+
+CREATE TABLE Carrito (
+    id_carrito INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    fecha_creacion DATETIME DEFAULT NOW(),
+    estado ENUM('activo','finalizado','cancelado') DEFAULT 'activo',
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+CREATE TABLE Carrito_Producto (
+    id_carrito_producto INT AUTO_INCREMENT PRIMARY KEY,
+    id_carrito INT NOT NULL,
+    id_producto INT NOT NULL,
+    cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    personalizacion TEXT,
+    FOREIGN KEY (id_carrito) REFERENCES Carrito(id_carrito),
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto)
+);
+
+CREATE TABLE Pedido (
+    id_pedido INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    fecha_pedido DATETIME DEFAULT NOW(),
+    estado ENUM('pendiente','confirmado','enviado','completado','anulado') DEFAULT 'pendiente',
+    total DECIMAL(10,2),
+    metodo_pago VARCHAR(50),
+    direccion_envio VARCHAR(255),
+    notas TEXT,
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+CREATE TABLE Pedido_Producto (
+    id_pedido_item INT AUTO_INCREMENT PRIMARY KEY,
+    id_pedido INT NOT NULL,
+    id_producto INT NOT NULL,
+    cantidad INT NOT NULL,
+    personalizacion TEXT,
+    precio_total DECIMAL(10,2),
+    FOREIGN KEY (id_pedido) REFERENCES Pedido(id_pedido),
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto)
+);
+
+-- =========================================
+-- MÓDULO PAGOS
+-- =========================================
+
+CREATE TABLE Transaccion_Pago (
+    id_transaccion INT AUTO_INCREMENT PRIMARY KEY,
+    id_pedido INT NOT NULL,
+    fecha_transaccion DATETIME DEFAULT NOW(),
+    monto DECIMAL(10,2) NOT NULL,
+    metodo_pago VARCHAR(50),
+    estado_pago ENUM('aprobado','pendiente','fallido','reembolsado') DEFAULT 'pendiente',
+    codigo_autorizacion VARCHAR(100),
+    detalle_response JSON,
+    FOREIGN KEY (id_pedido) REFERENCES Pedido(id_pedido)
+);
+
+CREATE TABLE Pago (
+    id_pago INT AUTO_INCREMENT PRIMARY KEY,
+    id_pedido INT NOT NULL,
+    metodo_pago VARCHAR(50),
+    estado ENUM('pendiente','aprobado','rechazado') DEFAULT 'pendiente',
+    fecha_pago DATETIME DEFAULT NOW(),
+    detalle_transaccion JSON,
+    FOREIGN KEY (id_pedido) REFERENCES Pedido(id_pedido)
+);
+
+-- =========================================
+-- MÓDULO JUEGOS
+-- =========================================
+
+CREATE TABLE Mini_juego (
+    id_juego INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    tipo ENUM('generico','personalizado'),
+    descripcion TEXT,
+    fecha_creacion DATETIME DEFAULT NOW()
+);
+
+CREATE TABLE Partida (
+    id_partida INT AUTO_INCREMENT PRIMARY KEY,
+    id_juego INT NOT NULL,
+    id_player1 INT NOT NULL,
+    id_player2 INT,
+    fecha_inicio DATETIME DEFAULT NOW(),
+    fecha_fin DATETIME,
+    id_playerGanador INT,
+    resultado ENUM('1','2','3','0'),
+    FOREIGN KEY (id_juego) REFERENCES Mini_juego(id_juego),
+    FOREIGN KEY (id_player1) REFERENCES Usuario(id_usuario),
+    FOREIGN KEY (id_player2) REFERENCES Usuario(id_usuario),
+    FOREIGN KEY (id_playerGanador) REFERENCES Usuario(id_usuario)
+);
+
+CREATE TABLE Progreso_Juego (
+    id_progreso INT AUTO_INCREMENT PRIMARY KEY,
+    id_juego INT NOT NULL,
+    id_usuario INT NOT NULL,
+    nivel INT DEFAULT 0,
+    puntaje_total INT DEFAULT 0,
+    fecha_actualizacion DATETIME DEFAULT NOW(),
+    FOREIGN KEY (id_juego) REFERENCES Mini_juego(id_juego),
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+-- =========================================
+-- MÓDULO BLOCKCHAIN / NFT / WALLET
+-- =========================================
+
+CREATE TABLE Wallet (
+    id_wallet INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    direccion VARCHAR(100) NOT NULL,
+    tipo ENUM('custodial','externo') NOT NULL,
+    proveedor VARCHAR(50),
+    fecha_creacion DATETIME DEFAULT NOW(),
+    estado ENUM('activo','suspendido') DEFAULT 'activo',
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+CREATE TABLE NFT (
+    id_nft INT AUTO_INCREMENT PRIMARY KEY,
+    id_producto INT NOT NULL,
+    id_wallet INT NOT NULL,
+    token_id VARCHAR(100),
+    contract_address VARCHAR(100),
+    metadata_uri VARCHAR(255),
+    mint_status ENUM('pending','minted','failed') DEFAULT 'pending',
+    mint_tx_hash VARCHAR(100),
+    fecha_creacion DATETIME DEFAULT NOW(),
+    estado ENUM('activo','transferido','quemado') DEFAULT 'activo',
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto),
+    FOREIGN KEY (id_wallet) REFERENCES Wallet(id_wallet)
+);
+
+CREATE TABLE NFT_Transaccion (
+    id_transaccion INT AUTO_INCREMENT PRIMARY KEY,
+    id_nft INT NOT NULL,
+    id_from INT,
+    id_to INT NOT NULL,
+    tx_hash VARCHAR(100),
+    tipo ENUM('mint','transfer','burn','sale'),
+    monto DECIMAL(10,2),
+    fecha DATETIME DEFAULT NOW(),
+    FOREIGN KEY (id_nft) REFERENCES NFT(id_nft),
+    FOREIGN KEY (id_from) REFERENCES Wallet(id_wallet),
+    FOREIGN KEY (id_to) REFERENCES Wallet(id_wallet)
+);
+
+CREATE TABLE NFT_Claim_Request (
+    id_claim INT AUTO_INCREMENT PRIMARY KEY,
+    id_nft INT NOT NULL,
+    id_usuario INT NOT NULL,
+    direccion_destino VARCHAR(100),
+    estado ENUM('pendiente','procesando','completado','rechazado') DEFAULT 'pendiente',
+    tx_hash VARCHAR(100),
+    fecha_solicitud DATETIME DEFAULT NOW(),
+    FOREIGN KEY (id_nft) REFERENCES NFT(id_nft),
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+-- =========================================
+-- MÓDULO QR / NFC
+-- =========================================
+
+CREATE TABLE QR (
+    id_qr INT AUTO_INCREMENT PRIMARY KEY,
+    id_producto INT NOT NULL,
+    codigo_qr VARCHAR(100) UNIQUE,
+    url_redireccion VARCHAR(255),
+    fecha_generacion DATETIME DEFAULT NOW(),
+    estado ENUM('activo','inactivo') DEFAULT 'activo',
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto)
+);
+
+CREATE TABLE QR_Log (
+    id_log INT AUTO_INCREMENT PRIMARY KEY,
+    id_qr INT NOT NULL,
+    id_usuario INT,
+    accion ENUM('escaneo','redireccion'),
+    fecha DATETIME DEFAULT NOW(),
+    FOREIGN KEY (id_qr) REFERENCES QR(id_qr),
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+CREATE TABLE NFC (
+    id_nfc INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_producto INT NOT NULL,
+    codigo_nfc VARCHAR(100) UNIQUE,
+    estado ENUM('activo','inactivo') DEFAULT 'activo',
+    fecha_asignacion DATETIME DEFAULT NOW(),
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario),
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto)
+);
+
+CREATE TABLE NFC_Log (
+    id_log INT AUTO_INCREMENT PRIMARY KEY,
+    id_nfc INT NOT NULL,
+    id_usuario INT,
+    accion ENUM('escaneo','registro','validacion'),
+    fecha DATETIME DEFAULT NOW(),
+    FOREIGN KEY (id_nfc) REFERENCES NFC(id_nfc),
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+-- =========================================
+-- MÓDULO SUBASTAS
+-- =========================================
+
+CREATE TABLE Subasta (
+    id_subasta INT AUTO_INCREMENT PRIMARY KEY,
+    id_producto INT NOT NULL,
+    fecha_inicio DATETIME DEFAULT NOW(),
+    fecha_fin DATETIME,
+    precio_inicial DECIMAL(10,2),
+    estado ENUM('activa','finalizada') DEFAULT 'activa',
+    FOREIGN KEY (id_producto) REFERENCES Producto(id_producto)
+);

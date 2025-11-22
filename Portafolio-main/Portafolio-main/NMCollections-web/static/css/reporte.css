@@ -1,0 +1,67 @@
+.reporte-card .card-title {
+    color: #fff;
+}
+/* Estilos para la vista de reportes de ventas admin */
+body {
+    margin: 0;
+    background: #585e60; 
+    color: #333;
+    padding-top: 70px; /* Ajusta este valor según la altura del header */
+}
+
+
+.reporte-gestion {
+    background: #1a1a1a;
+    border-radius: 15px;
+    padding: 2rem;
+    color: #fff;
+}
+
+.reporte-title {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.reporte-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.reporte-card .card-body {
+    padding: 1.25rem;
+    background: linear-gradient(to bottom, #1a1a1a, #242424);
+}
+
+.reporte-precio {
+    color: #00ff88;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.reporte-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.reporte-btn:hover {
+    background-color: #34495e;
+    color: #00ff88;
+}
+
+@media (max-width: 768px) {
+    .reporte-gestion {
+        padding: 1rem;
+    }
+}

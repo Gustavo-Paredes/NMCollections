@@ -1,0 +1,33 @@
+<!-- COLOCAR ESTE CÓDIGO EN: templates/usuarios/address_form.html -->
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - NM Collections{% endblock %}
+
+{% block content %}
+<div class="address-form-container">
+    <div class="address-form-card">
+        <div class="address-form-header">
+            <h2>{{ title }}</h2>
+        </div>
+        
+        <form method="post" class="address-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="nombre">Nombre de la dirección</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ej: Casa, Trabajo" 
+                       value="{{ form.nombre.value|default:'' }}" required>
+                <small>Un nombre para identificar esta dirección</small>
+            </div>
+            
+            <!-- Resto del formulario aquí -->
+            
+            <div class="form-buttons">
+                <a href="{% url 'usuarios:addresses' %}" class="btn-outline">Cancelar</a>
+                <button type="submit" class="btn-primary">Guardar Dirección</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

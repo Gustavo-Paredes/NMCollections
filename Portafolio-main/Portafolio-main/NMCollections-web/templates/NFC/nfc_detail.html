@@ -1,0 +1,30 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<div class="card-detail-box" style="max-width: 500px; margin: 2rem auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 16px #e0e0e0; padding: 2.5rem 2rem;">
+    <h2 style="text-align:center; margin-bottom:1.5rem; font-size:2.1rem; font-weight:700;">{{ nfc.producto.nombre }}</h2>
+    {% if nfc.producto.imagenes.all %}
+        {% for img in nfc.producto.imagenes.all %}
+            {% if img.es_principal %}
+                <img src="{{ img.imagen.url }}" alt="Imagen principal" style="width:100%; max-width:350px; display:block; margin:0 auto 1.5rem; border-radius:12px; box-shadow:0 2px 8px #bbb;">
+            {% endif %}
+        {% endfor %}
+    {% elif nfc.producto.imagen_referencia %}
+        <img src="{{ nfc.producto.imagen_referencia.url }}" alt="Imagen de referencia" style="width:100%; max-width:350px; display:block; margin:0 auto 1.5rem; border-radius:12px; box-shadow:0 2px 8px #bbb;">
+    {% endif %}
+    <div style="margin-top:1.5rem;">
+        <p style="font-size:1.1rem;"><strong>Código NFC:</strong> {{ nfc.codigo_nfc }}</p>
+        <p style="font-size:1.1rem;"><strong>Estado:</strong> {{ nfc.estado }}</p>
+        <p style="font-size:1.1rem;"><strong>Dueño:</strong> {{ nfc.usuario.username }}</p>
+        <p style="font-size:1.1rem;"><strong>Descripción:</strong> {{ nfc.producto.descripcion }}</p>
+    </div>
+    {% if user.is_authenticated and user.id == nfc.usuario.id %}
+        <div style="margin-top:2.5rem; text-align:center;">
+            <form method="post" action="">
+                {% csrf_token %}
+                <button type="submit" name="transferir" style="background:#007bff; color:#fff; border:none; padding:0.8rem 2.2rem; border-radius:8px; font-size:1.1rem; font-weight:600; cursor:pointer; box-shadow:0 2px 8px #bbb;">Transferir carta</button>
+            </form>
+            <p style="margin-top:1.2rem; color:#555; font-size:1rem;">Al presionar <b>Transferir carta</b>, la próxima persona que escanee el NFC recibirá la tarjeta automáticamente.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

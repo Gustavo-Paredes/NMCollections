@@ -1,0 +1,1 @@
+# Esta app no tiene admin propio, solo centraliza la API

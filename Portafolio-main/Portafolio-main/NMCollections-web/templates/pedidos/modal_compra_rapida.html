@@ -1,0 +1,78 @@
+<!-- Modal de Compra Rápida -->
+<div class="modal fade" id="modalCompraRapida{{ producto.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-shopping-cart me-2"></i>Comprar: {{ producto.nombre }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'pedidos:comprar_producto' producto.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Precio:</strong></label>
+                        <p class="fs-4 text-primary mb-0">${{ producto.precio_base|floatformat:0 }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="cantidad{{ producto.id }}" class="form-label">
+                            <i class="fas fa-boxes me-2"></i>Cantidad
+                        </label>
+                        <input 
+                            type="number" 
+                            class="form-control" 
+                            id="cantidad{{ producto.id }}" 
+                            name="cantidad" 
+                            value="1" 
+                            min="1" 
+                            {% if producto.stock %}max="{{ producto.stock }}"{% endif %}
+                            required>
+                        {% if producto.stock %}
+                        <small class="text-muted">Stock disponible: {{ producto.stock }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="direccion_envio{{ producto.id }}" class="form-label">
+                            <i class="fas fa-map-marker-alt me-2"></i>Dirección de Envío *
+                        </label>
+                        <textarea 
+                            class="form-control" 
+                            id="direccion_envio{{ producto.id }}" 
+                            name="direccion_envio" 
+                            rows="3" 
+                            required
+                            placeholder="Ej: Calle Principal 123, Depto 4B, Santiago"></textarea>
+                        <small class="text-muted">Ingresa la dirección completa donde deseas recibir tu pedido</small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Pago seguro con Transbank WebPay Plus</strong><br>
+                        <small>Acepta tarjetas de crédito, débito y RedCompra</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-credit-card me-2"></i>Proceder al Pago
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Calcular total dinámicamente
+document.getElementById('cantidad{{ producto.id }}').addEventListener('input', function() {
+    const cantidad = parseInt(this.value) || 1;
+    const precio = {{ producto.precio_base }};
+    const total = cantidad * precio;
+    // Podrías agregar un elemento para mostrar el total
+});
+</script>

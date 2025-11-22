@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Recuperar Contraseña - NM Collections{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Recuperar Contraseña</h2>
+            <p>Ingresa tu correo electrónico y te enviaremos instrucciones</p>
+        </div>
+
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="correo">Correo Electrónico</label>
+                <input 
+                    type="email" 
+                    id="correo" 
+                    name="correo" 
+                    placeholder="tu@correo.com" 
+                    required
+                    autocomplete="email">
+            </div>
+
+            <button type="submit" class="btn-login">Enviar Instrucciones</button>
+        </form>
+
+        <div class="login-footer">
+            <p>¿Recordaste tu contraseña? <a href="{% url 'usuarios:login' %}">Iniciar Sesión</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

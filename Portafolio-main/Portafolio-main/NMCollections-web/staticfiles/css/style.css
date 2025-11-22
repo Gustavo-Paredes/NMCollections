@@ -1,0 +1,252 @@
+/*Estilo para el fondo*/
+body {
+    margin: 0;
+    background: #585e60; 
+    color: #333;
+    padding-top: 70px; /* Ajusta este valor según la altura del header */
+}
+
+
+/* Estilos para el header y navbar */
+header {
+    background: #222;
+    padding: 0.5rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.navbar-custom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+}
+
+.navbar-logo img {
+    display: block;
+    height: 40px;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: flex-end;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin: 0 1.5rem;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: #07ff2c;
+}
+
+
+/* === FOOTER PEGADO AL FINAL === */
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+footer {
+    margin-top: auto;
+}
+
+/* === FOOTER GENERAL === */
+.footer-custom {
+    background-color: #0d0d0d; /* Negro suave */
+    color: #797979ff;
+    padding: 50px 0 20px;
+    font-family: "Poppins", sans-serif;
+    border-top: 2px solid #00c853; /* Verde principal */
+}
+
+/* === CONTENEDOR PRINCIPAL === */
+.footer-custom .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+
+/* === SECCIONES === */
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.footer-section {
+    flex: 1 1 220px;
+    min-width: 200px;
+}
+
+/* === TITULOS === */
+.footer-section h4 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    color: #fff;
+}
+
+.footer-section h5 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #00c853; /* Verde acento */
+}
+
+/* === TEXTOS Y ENLACES === */
+.footer-section p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #bfbfbf;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+    text-decoration: none;
+    color: #bfbfbf;
+    transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+    color: #00c853; /* Hover verde */
+}
+
+/* === REDES SOCIALES === */
+.social-links {
+    margin-top: 15px;
+}
+
+.social-links a {
+    display: inline-block;
+    margin-right: 10px;
+    color: #bfbfbf;
+    font-size: 1.3rem;
+    transition: color 0.3s ease, transform 0.2s;
+}
+
+.social-links a:hover {
+    color: #00e676; /* Verde brillante al hover */
+    transform: translateY(-3px);
+}
+
+/* === PARTE INFERIOR === */
+.footer-bottom {
+    border-top: 1px solid #1f1f1f;
+    text-align: center;
+    padding-top: 15px;
+    font-size: 0.9rem;
+    color: #8c8c8c;
+}
+
+.footer-bottom p {
+    margin: 0;
+}
+
+/* === RESPONSIVO === */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-section {
+        margin-bottom: 25px;
+    }
+
+    .social-links a {
+        font-size: 1.5rem;
+    }
+}
+
+/* === DROPDOWN === */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  cursor: pointer;
+  color: #4e4e4eff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-toggle i {
+  margin-left: 6px;
+  font-size: 0.8rem;
+  transition: transform 0.2s;
+}
+
+/* Menú oculto por defecto */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #4a4a4a; /* Fondo gris del menú */
+  min-width: 160px;
+  list-style: none;
+  padding: 10px 0;
+  margin: 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  z-index: 999;
+}
+
+/* Estilo de los items */
+.dropdown-menu li {
+  padding: 8px 15px;
+}
+
+.dropdown-menu li a {
+  color: #3f3f3f; /* Letras blancas por defecto */
+  text-decoration: none;
+  display: block;
+  font-family: 'Oswald', sans-serif;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+/* Efecto hover: letras verdes y fondo más oscuro */
+.dropdown-menu li a:hover {
+  color: #00ff66; /* Verde brillante al pasar el mouse */
+}
+
+/* Mostrar menú al hacer hover */
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+/* Gira el ícono al desplegar */
+.dropdown:hover .dropdown-toggle i {
+  transform: rotate(180deg);
+}

@@ -1,0 +1,256 @@
+/* Tarjeta de subasta estilo oscuro y moderno */
+body {
+    margin: 0;
+    background: #585e60; 
+    color: #333;
+    padding-top: 70px; /* Ajusta este valor según la altura del header */
+}
+.subasta-card {
+    background: #2c2c2c;
+    color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    padding: 0;
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px; /* opcional según tu diseño */
+    margin: auto;
+    overflow: hidden;
+}
+.subasta-card:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 16px 32px rgba(0,200,83,0.15);
+}
+
+.subasta-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch; /* para que los botones ocupen todo el ancho */
+    padding: 1rem;
+    gap: 1rem; /* espacio entre elementos internos */
+    overflow: hidden;
+}
+
+.subasta-title {
+    color: #00c853;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.subasta-estado {
+    color: #00e676;
+}
+
+.subasta-precio {
+    color: #fff;
+}
+
+.subasta-fecha {
+    color: #bfbfbf;
+}
+
+.subasta-btn {
+    background: #00c853;
+    color: #fff;
+    border-radius: 8px;
+    border: none;
+    transition: background 0.3s, transform 0.2s;
+}
+.subasta-btn:hover {
+    background: #00e676;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+    .subasta-card {
+        min-width: 100%;
+        max-width: 100%;
+        min-height: 220px;
+        max-height: 260px;
+        flex-direction: column;
+    }
+    .subasta-card .card-body {
+        padding: 1rem;
+    }
+}
+
+.subasta-card {
+    background: #2c2c2c;
+    color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.subasta-card:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 16px 32px rgba(0,200,83,0.15);
+}
+
+.card-body.crear-subasta-form {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+    background: #383838;
+    border-radius: 12px; /* borde rectangular suavizado */
+}
+
+.crear-subasta-form.rectangular-form {
+    border: 1px solid #555;
+}
+
+.crear-subasta-form .form-group.row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.crear-subasta-form .form-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.crear-subasta-form input,
+.crear-subasta-form select,
+.crear-subasta-form textarea {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 1rem;
+    transition: border 0.3s, background 0.3s;
+}
+
+.crear-subasta-form input:focus,
+.crear-subasta-form select:focus,
+.crear-subasta-form textarea:focus {
+    outline: none;
+    border-color: #00c853;
+    background: #2f2f2f;
+}
+
+.crear-subasta-form label {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #00c853;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.subasta-btn {
+    width: 100%;
+    padding: 0.7rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.subasta-btn.eliminar {
+    background: #b71c1c;
+}
+.subasta-btn.eliminar:hover {
+    background: #d32f2f;
+}
+
+
+@media (max-width: 600px) {
+    .crear-subasta-form .form-group.row {
+        flex-direction: column;
+    }
+}
+
+/* --- Estilos específicos del CHAT --- */
+.chat-box-style {
+    height: 300px;
+    overflow-y: auto;
+    /* Fondo del chat para que contraste un poco con la tarjeta */
+    background: #1e1e1e; 
+    border: 1px solid #444; 
+    border-radius: 8px;
+    padding: 10px;
+    /* Estilos de la barra de desplazamiento */
+    scrollbar-color: #00c853 #1e1e1e; /* Color del thumb y track */
+    scrollbar-width: thin;
+}
+
+/* Estilo para navegadores basados en Webkit (Chrome, Edge, Safari) */
+.chat-box-style::-webkit-scrollbar {
+    width: 8px;
+}
+.chat-box-style::-webkit-scrollbar-track {
+    background: #1e1e1e; 
+    border-radius: 10px;
+}
+.chat-box-style::-webkit-scrollbar-thumb {
+    background-color: #00c853; 
+    border-radius: 10px;
+    border: 2px solid #1e1e1e;
+}
+
+/* Estilo para la entrada de texto */
+.chat-input-style {
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+    transition: border-color 0.3s;
+}
+.chat-input-style:focus {
+    background: #3a3a3a;
+    border-color: #00e676;
+    color: #fff;
+    box-shadow: none;
+}
+
+.chat-input-style::placeholder {
+  color: #888; /* Elige el color que quieras, por ejemplo un gris claro */
+  opacity: 1; /* Por defecto, Firefox le baja la opacidad */
+}
+
+/* Estilos de los mensajes individuales */
+.chat-message {
+    margin-bottom: 5px;
+    padding: 5px 10px;
+    border-radius: 12px;
+    line-height: 1.4;
+    font-size: 0.95rem;
+    word-wrap: break-word; /* Asegura que los mensajes largos no desborden */
+}
+
+/* Mensajes del usuario actual (simulado con una clase) */
+.chat-message.self {
+    background: #00c85333; /* Verde tenue */
+    color: #fff;
+    text-align: right;
+    margin-left: 20%;
+}
+
+/* Mensajes de otros usuarios */
+.chat-message.other {
+    background: #3a3a3a;
+    color: #f1f1f1;
+    margin-right: 20%;
+}
+@media (min-width: 992px) {
+    .container .row {
+        align-items: flex-start;
+    }
+    .col-lg-4 {
+        position: sticky;
+        top: 20px; /* opcional, mantiene el formulario visible al hacer scroll */
+    }
+}

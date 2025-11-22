@@ -1,0 +1,49 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Vista Previa - {{ carta.nombre_carta }} - NM Collections{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/nm-dark-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/personalizacion_vista_previa_carta.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    
+    <div class="vista-previa-container">
+            <button class="btn btn-outline-light close-btn" onclick="window.close()">
+        <i class="fas fa-times"></i> Cerrar
+    </button>
+        <div class="carta-preview-large">
+            {% if carta.imagen_generada %}
+                <img src="{{ carta.imagen_generada.url }}" 
+                     alt="{{ carta.nombre_carta|default:'Carta sin nombre' }}"
+                     class="carta-imagen-large">
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                    <p class="mt-3 text-muted">No hay imagen generada</p>
+                </div>
+            {% endif %}
+            
+            <div class="carta-info">
+                <h2 class="carta-titulo">{{ carta.nombre_carta|default:"Carta sin nombre" }}</h2>
+                <p class="carta-plantilla">
+                    <i class="fas fa-palette"></i> Plantilla: {{ carta.plantilla.nombre }}
+                </p>
+                <p class="text-muted">
+                    <i class="fas fa-calendar"></i> 
+                    Creada: {{ carta.fecha_creacion|date:"d/m/Y H:i" }}
+                </p>
+                <span class="carta-estado estado-{{ carta.estado }}">
+                    {% if carta.estado == 'finalizada' %}
+                        <i class="fas fa-check-circle"></i> Finalizada
+                    {% else %}
+                        <i class="fas fa-edit"></i> {{ carta.estado|title }}
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+{% endblock %}

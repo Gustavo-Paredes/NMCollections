@@ -1,0 +1,65 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}¡Pago Exitoso! - NM Collections{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h1 class="mb-3 text-success">¡Pago Exitoso!</h1>
+                    <p class="lead mb-4">
+                        Tu compra ha sido procesada correctamente
+                    </p>
+                    
+                    {% if pedido_info %}
+                    <div class="alert alert-success" role="alert">
+                        <h5 class="alert-heading">Detalles de la transacción</h5>
+                        <hr>
+                        <p class="mb-1"><strong>Número de Pedido:</strong> {{ pedido_info.numero_pedido }}</p>
+                        <p class="mb-1"><strong>Total pagado:</strong> ${{ pedido_info.total }}</p>
+                        <p class="mb-1"><strong>Código de autorización:</strong> {{ pedido_info.auth_code }}</p>
+                        {% if pedido_info.tipo_pago %}
+                        <p class="mb-1"><strong>Método de pago:</strong> {{ pedido_info.tipo_pago }}</p>
+                        {% endif %}
+                        {% if pedido_info.cuotas and pedido_info.cuotas > 0 %}
+                        <p class="mb-1"><strong>Cuotas:</strong> {{ pedido_info.cuotas }}x</p>
+                        {% endif %}
+                        {% if pedido_info.ultimos_4_digitos %}
+                        <p class="mb-0"><strong>Tarjeta:</strong> **** **** **** {{ pedido_info.ultimos_4_digitos }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-envelope me-2"></i>
+                        Recibirás un correo electrónico con los detalles de tu pedido.<br>
+                        Te notificaremos cuando tu pedido sea enviado.
+                    </p>
+                    
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{% url 'pedidos:mis_pedidos' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-shopping-bag me-2"></i>Ver Mis Pedidos
+                        </a>
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home me-2"></i>Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    <i class="fas fa-lock me-2"></i>
+                    Pago procesado de forma segura por Transbank WebPay Plus
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

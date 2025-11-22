@@ -1,0 +1,84 @@
+{% load formatting %}
+
+<!-- Modal para Checkout del Carrito -->
+<div class="modal fade" id="modalCheckoutCarrito" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-shopping-cart me-2"></i>Finalizar Compra
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'pedidos:comprar_carrito' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- Resumen del carrito -->
+                    <h6 class="mb-3">Resumen de tu Pedido</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ item.producto.nombre }}</td>
+                                    <td>{{ item.cantidad }}</td>
+                                    <td>$ {{ item.precio_unitario|miles }}</td>
+                                    <td class="text-end">$ {{ item.subtotal|miles }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong class="text-primary">$ {{ total|miles }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <!-- Dirección de envío -->
+                    <div class="mb-3">
+                        <label for="direccion_envio_carrito" class="form-label">
+                            <i class="fas fa-map-marker-alt me-2"></i>Dirección de Envío *
+                        </label>
+                        <textarea 
+                            class="form-control" 
+                            id="direccion_envio_carrito" 
+                            name="direccion_envio" 
+                            rows="3" 
+                            required
+                            placeholder="Ej: Av. Providencia 1234, Depto 502, Providencia, Santiago"></textarea>
+                        <small class="text-muted">Ingresa la dirección completa donde deseas recibir tu pedido</small>
+                    </div>
+                    
+                    <!-- Información de pago -->
+                    <div class="alert alert-info mb-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-shield-alt fa-2x text-info me-3"></i>
+                            <div>
+                                <strong>Pago 100% Seguro con Transbank WebPay Plus</strong><br>
+                                <small>Acepta: Visa, Mastercard, American Express, Débito y RedCompra</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-credit-card me-2"></i>Proceder al Pago
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

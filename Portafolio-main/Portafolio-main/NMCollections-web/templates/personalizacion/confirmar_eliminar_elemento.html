@@ -1,0 +1,64 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Elemento - {{ elemento.nombre_parametro }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/personalizacion_confirmar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="confirm-delete">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="confirm-container">
+                    <div class="delete-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    
+                    <h2 class="text-danger mb-4">¿Eliminar Elemento?</h2>
+                    
+                    <p class="lead">Esta acción eliminará permanentemente este elemento de la plantilla.</p>
+                    
+                    <div class="elemento-info">
+                        <h5>
+                            <i class="fas fa-{% if elemento.tipo_elemento == 'texto' %}font{% elif elemento.tipo_elemento == 'imagen' %}image{% elif elemento.tipo_elemento == 'color' %}palette{% else %}hashtag{% endif %}"></i>
+                            {{ elemento.nombre_parametro }}
+                        </h5>
+                        <p class="mb-2">
+                            <strong>Tipo:</strong> 
+                            <span class="tipo-badge">{{ elemento.get_tipo_elemento_display }}</span>
+                        </p>
+                        <p class="mb-2"><strong>Plantilla:</strong> {{ elemento.plantilla.nombre }}</p>
+                        {% if elemento.posicion_x and elemento.posicion_y %}
+                        <p class="mb-2"><strong>Posición:</strong> X: {{ elemento.posicion_x }}px, Y: {{ elemento.posicion_y }}px</p>
+                        {% endif %}
+                        {% if elemento.ancho and elemento.alto %}
+                        <p class="mb-2"><strong>Tamaño:</strong> {{ elemento.ancho }} x {{ elemento.alto }}px</p>
+                        {% endif %}
+                        {% if elemento.color %}
+                        <p class="mb-0"><strong>Color:</strong> {{ elemento.color }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-warning"></i>
+                        <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                    </div>
+                    
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <a href="{% url 'personalizacion:editar_plantilla' elemento.plantilla.id %}" class="btn btn-secondary me-3">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Eliminar Elemento
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

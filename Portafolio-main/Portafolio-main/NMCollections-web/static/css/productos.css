@@ -1,0 +1,640 @@
+/* Estilos para el catálogo de productos y vista detalle */
+body {
+    margin: 0;
+    background: #585e60;
+    color: #333;
+    padding-top: 70px;
+    /* Ajusta este valor según la altura del header */
+}
+
+/* Cards de productos */
+.producto-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.producto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.producto-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.producto-card .card-body {
+    padding: 1.25rem;
+    background: linear-gradient(to bottom, #1a1a1a, #242424);
+}
+
+.producto-title {
+    color: #fff;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.producto-categoria {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.producto-precio {
+    color: #00ff88;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.producto-stock {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.producto-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.producto-btn:hover {
+    background-color: #34495e;
+    color: #00ff88;
+}
+
+/* Vista de detalle */
+.producto-detalle {
+    background: #1a1a1a;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.producto-imagen-principal {
+    width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.producto-info {
+    color: #fff;
+    padding: 1rem 0;
+}
+
+.producto-descripcion {
+    color: #888;
+    margin: 1rem 0;
+    line-height: 1.6;
+}
+
+.producto-metadata {
+    background: #242424;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.producto-metadata dt {
+    color: #888;
+    font-weight: normal;
+}
+
+.producto-metadata dd {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+/* Botones de acción */
+.producto-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-carrito {
+    background-color: #2c3e50;
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 5px;
+    flex: 1;
+    transition: all 0.3s ease;
+}
+
+.btn-carrito:hover {
+    background-color: #34495e;
+    color: #00ff88;
+}
+
+.btn-volver {
+    background-color: transparent;
+    border: 1px solid #2c3e50;
+    color: #888;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn-volver:hover {
+    border-color: #00ff88;
+    color: #00ff88;
+}
+
+/* Formulario de Producto */
+.producto-form-container {
+    background: #1a1a1a;
+    border-radius: 15px;
+    padding: 2rem;
+    color: #fff;
+    max-width: 1100px; /* Evita que sea muy horizontal en pantallas grandes */
+    margin: 0 auto;    /* Centra el contenedor */
+}
+
+.producto-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.producto-form .form-label {
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.producto-form .form-control {
+    background-color: #2c2c2c;
+    border: 1px solid #404040;
+    color: #fff;
+    padding: 0.75rem;
+}
+
+/* Textarea de descripción con altura controlada */
+.producto-form textarea.form-control {
+    min-height: 80px;
+    max-height: 120px;
+    resize: vertical;
+}
+
+.producto-form .form-control:focus {
+    background-color: #2c2c2c;
+    border-color: #00ff88;
+    box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+    color: #fff;
+}
+
+.producto-form select.form-control option {
+    background-color: #c2c2c2;
+    color: #fff;
+}
+
+.producto-form .errorlist {
+    color: #ff4444;
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0;
+    font-size: 0.875rem;
+}
+
+.producto-form .btn-secondary {
+    background-color: #404040;
+    border: none;
+}
+
+.producto-form .btn-secondary:hover {
+    background-color: #505050;
+}
+
+/* Sidebar de imágenes en el formulario (fijo en escritorio) */
+.producto-form-sidebar {
+    position: sticky;
+    top: 90px; /* altura aproximada del header */
+}
+
+
+.producto-galeria {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #000;
+}
+
+.galeria-container {
+    display: flex;
+    transition: transform 0.3s ease-in-out;
+    height: 500px;
+}
+
+.galeria-slide {
+    min-width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.galeria-slide img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.galeria-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 20px;
+    z-index: 10;
+    transition: background 0.2s;
+}
+
+.galeria-nav:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.galeria-nav-prev {
+    left: 10px;
+}
+
+.galeria-nav-next {
+    right: 10px;
+}
+
+.galeria-indicators {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.indicator.active {
+    background: white;
+    width: 24px;
+    border-radius: 4px;
+}
+
+.galeria-contador {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 10;
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+    .producto-card .card-img-top {
+        height: 150px;
+    }
+
+    .producto-actions {
+        flex-direction: column;
+    }
+
+    .producto-detalle {
+        padding: 1rem;
+    }
+
+    .producto-form-container {
+        padding: 1rem;
+    }
+}/* ===== ESTILOS PARA GESTIONAR PRODUCTOS (TABLA) ===== */
+
+/* Contenedor principal de gestión */
+.producto-gestion {
+    background: #1a1a1a;
+    padding: 2rem;
+    border-radius: 15px;
+}
+
+/* Responsive ajustes para el layout lateral del formulario */
+@media (min-width: 992px) {
+    /* Asegura separación visual entre columnas */
+    .producto-form-container .col-lg-7 { padding-right: 1rem; }
+    .producto-form-container .col-lg-5 { padding-left: 1rem; }
+}
+
+/* Título principal "Gestionar Productos" */
+.producto-gestion h2 {
+    color: #fff;                    /* Color del texto */
+    font-size: 2rem;                /* Tamaño del título */
+    font-weight: 700;               /* Grosor de la fuente */
+    font-family: 'Arial', sans-serif; /* Tipo de fuente */
+    text-transform: uppercase;      /* Mayúsculas */
+    letter-spacing: 1px;            /* Espaciado entre letras */
+}
+
+/* Tabla de productos */
+.producto-gestion .table {
+    background: #1a1a1a;
+    color: #fff;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Encabezados de la tabla (Nombre, Categoría, Precio, etc.) */
+.producto-gestion .table thead th {
+    background: #2c3e50;
+    color: #fff;                    /* Color del texto */
+    font-size: 0.95rem;             /* Tamaño de letra */
+    font-weight: 600;               /* Grosor */
+    text-transform: uppercase;      /* Mayúsculas */
+    letter-spacing: 0.5px;          /* Espaciado */
+    padding: 1rem;
+    border: none;
+}
+
+/* Celdas de datos en la tabla */
+.producto-gestion .table tbody td {
+    background-color: #1f1f1f;
+    color: #e4e4e4;                    /* Color del texto */
+    font-size: 0.9rem;              /* Tamaño de letra */
+    font-weight: 400;               /* Grosor normal */
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #333;
+    vertical-align: middle;
+}
+
+/* Nombres de productos en la tabla */
+.producto-gestion .table tbody td:nth-child(2) {
+    color: #ffffff;                    /* Color blanco para nombres */
+    font-weight: 500;               /* Un poco más grueso */
+    font-size: 1rem;                /* Tamaño ligeramente mayor */
+}
+
+/* Precios en la tabla */
+.producto-gestion .table tbody td:nth-child(4) {
+    color: #00ff88;                 /* Color verde para precios */
+    font-weight: 600;               /* Más grueso */
+    font-size: 1.05rem;             /* Tamaño mayor */
+}
+
+/* Stock en la tabla */
+.producto-gestion .table tbody td:nth-child(5) {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* Badges de estado (Activo/Inactivo) */
+.producto-gestion .badge {
+    font-size: 0.85rem;             /* Tamaño de letra */
+    font-weight: 500;               /* Grosor */
+    padding: 0.4rem 0.8rem;
+    text-transform: uppercase;      /* Mayúsculas */
+    letter-spacing: 0.5px;          /* Espaciado */
+}
+
+/* Hover en las filas */
+.producto-gestion .table tbody tr:hover {
+    background: #242424;
+}
+
+.producto-gestion .table tbody tr:hover td {
+    color: #00ff88;                    /* Texto más brillante al pasar mouse */
+}
+
+/* Labels de formularios de filtro */
+.producto-gestion .form-label {
+    color: #fff;                    /* Color del texto */
+    font-size: 0.9rem;              /* Tamaño */
+    font-weight: 500;               /* Grosor */
+    margin-bottom: 0.5rem;
+}
+
+/* Inputs y selects de filtro */
+.producto-gestion .form-control,
+.producto-gestion .form-select {
+    background: #2c2c2c;
+    border: 1px solid #404040;
+    color: #fff;                    /* Color del texto */
+    font-size: 0.9rem;              /* Tamaño de letra */
+    padding: 0.6rem;
+}
+
+.producto-gestion .form-control::placeholder {
+    color: #888;                    /* Color del placeholder */
+    font-style: italic;             /* Cursiva para placeholder */
+}
+
+/* Botones */
+.producto-gestion .btn {
+    font-size: 0.95rem;             /* Tamaño de letra */
+    font-weight: 500;               /* Grosor */
+    letter-spacing: 0.5px;          /* Espaciado */
+    text-transform: uppercase;      /* Mayúsculas */
+}
+
+/* Mensaje cuando no hay productos */
+.producto-gestion .table tbody td[colspan] {
+    color: #888;                    /* Color gris */
+    font-size: 1rem;                /* Tamaño */
+    font-style: italic;             /* Cursiva */
+    text-align: center;
+    padding: 2rem;
+}
+/* Estilos adicionales para el formulario de múltiples imágenes */
+#preview-nuevas-imagenes {
+    min-height: 50px;
+    padding: 10px;
+    background: #242424;
+    border-radius: 8px;
+    border: 2px dashed #404040;
+}
+
+#preview-nuevas-imagenes:empty {
+    display: none;
+}
+
+.producto-form input[type="file"] {
+    cursor: pointer;
+    padding: 0.75rem;
+    background-color: #2c2c2c;
+    border: 2px dashed #404040;
+    transition: border-color 0.3s ease;
+}
+
+.producto-form input[type="file"]:hover {
+    border-color: #00ff88;
+}
+
+.producto-form .card {
+    background: #2c2c2c;
+    border: 1px solid #404040;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden; /* Evita que el contenido (imagen/enlaces) se salga de la card */
+}
+
+.producto-form .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.producto-form .card-body {
+    background: #242424;
+    overflow-wrap: anywhere; /* Evita desbordes de enlaces o textos largos */
+}
+
+/* Asegura que las imágenes se ajusten a la card sin sobresalir */
+.producto-form .card .card-img-top,
+.producto-card .card-img-top {
+    display: block;
+    width: 100%;
+}
+
+/* Enlaces dentro de cards no deben desbordar */
+.producto-form .card a {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.producto-form .form-check-label {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.producto-form .form-check-input:checked {
+    background-color: #ff4444;
+    border-color: #ff4444;
+}
+
+.producto-form .text-muted {
+    color: #888 !important;
+}
+
+/* Horizontal sidebar preview when multiple images are selected */
+#preview-nuevas-imagenes.scroll-horizontal {
+    display: flex;
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    scrollbar-width: thin; /* Firefox */
+    -ms-overflow-style: -ms-autohiding-scrollbar; /* IE/Edge legacy */
+}
+#preview-nuevas-imagenes.scroll-horizontal::-webkit-scrollbar { height: 8px; }
+#preview-nuevas-imagenes.scroll-horizontal::-webkit-scrollbar-track { background: #1f1f1f; border-radius: 4px; }
+#preview-nuevas-imagenes.scroll-horizontal::-webkit-scrollbar-thumb { background: #3b3b3b; border-radius: 4px; }
+
+#preview-nuevas-imagenes .preview-item {
+    flex: 0 0 auto;
+    width: 120px;
+    text-align: center;
+    position: relative;
+}
+#preview-nuevas-imagenes .preview-item img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+}
+
+/* Botón de eliminar individual sobre cada preview */
+#preview-nuevas-imagenes .preview-item .btn-remove-preview,
+#imagenes-actuales-container .preview-item .btn-remove-preview {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    transition: background 0.2s ease;
+    z-index: 10;
+}
+#preview-nuevas-imagenes .preview-item .btn-remove-preview:hover,
+#imagenes-actuales-container .preview-item .btn-remove-preview:hover {
+    background: rgba(220, 53, 69, 1);
+    transform: scale(1.1);
+}
+
+/* Imágenes actuales con modo horizontal cuando hay más de 2 */
+#imagenes-actuales-container {
+    min-height: 50px;
+    padding: 10px;
+    background: #242424;
+    border-radius: 8px;
+    border: 2px dashed #404040;
+}
+
+#imagenes-actuales-container.scroll-horizontal {
+    display: flex;
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+#imagenes-actuales-container.scroll-horizontal::-webkit-scrollbar { height: 8px; }
+#imagenes-actuales-container.scroll-horizontal::-webkit-scrollbar-track { background: #1f1f1f; border-radius: 4px; }
+#imagenes-actuales-container.scroll-horizontal::-webkit-scrollbar-thumb { background: #3b3b3b; border-radius: 4px; }
+
+#imagenes-actuales-container .preview-item {
+    flex: 0 0 auto;
+    width: 120px;
+    text-align: center;
+    position: relative;
+}
+#imagenes-actuales-container .preview-item img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+}
+#imagenes-actuales-container .preview-item .small {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
