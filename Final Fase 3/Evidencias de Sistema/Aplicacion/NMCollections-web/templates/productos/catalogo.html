@@ -1,6 +1,5 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% load humanize %}
 {% load formatting %}
 
 {% block title %}{{ title|default:'Catálogo - NM Collections' }}{% endblock %}
@@ -33,7 +32,7 @@
                 <div class="card-body">
                     <h5 class="card-title producto-title">{{ producto.nombre }}</h5>
                     <p class="card-text producto-categoria">{{ producto.categoria.nombre }}</p>
-                    <p class="card-text producto-precio">$ {{ producto.precio_base|floatformat:0|intcomma }}</p>
+                    <p class="card-text producto-precio">$ {{ producto.precio_base|miles }}</p>
                     {% if producto.stock is not None %}
                     <p class="producto-stock">
                         <i class="fas fa-boxes me-1"></i>Stock: {{ producto.stock }} unidades

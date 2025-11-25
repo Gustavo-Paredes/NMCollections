@@ -36,7 +36,6 @@
                      <li><a class="dropdown-item" href="{% url 'usuarios:dashboard' %}">Panel de Administración</a></li>
                      <li><a class="dropdown-item" href="{% url 'soporte:admin_threads' %}">Soporte (Admin)</a></li>
                   {% else %}
-                     <li><a class="dropdown-item" href="{% url 'usuarios:dashboard' %}">Panel</a></li>
                      <li><a class="dropdown-item" href="{% url 'soporte:mi_soporte' %}">Soporte</a></li>
                   {% endif %}
                   <li><a class="dropdown-item" href="{% url 'personalizacion:mis_cartas' %}">Mis Cartas</a></li>

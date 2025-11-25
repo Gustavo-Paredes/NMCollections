@@ -34,7 +34,7 @@ function verificarLibrerias() {
     
     if (!axiosOk) {
         console.error('❌ Axios no está cargado');
-        mostrarNotificacion('Error: Axios no se cargó. Recarga la página.', 'error');
+        alert('Error: Axios no se cargó. Recarga la página.');
         return false;
     }
     
@@ -186,65 +186,19 @@ function mostrarLoading(show = true, mensaje = 'Cargando...') {
  * Muestra una notificación temporal
  */
 function mostrarNotificacion(mensaje, tipo = 'info') {
-        const tipos = {
-                success: { icon: 'check-circle', clase: 'success' },
-                error: { icon: 'times-circle', clase: 'danger' },
-                warning: { icon: 'exclamation-triangle', clase: 'warning' },
-                info: { icon: 'info-circle', clase: 'info' }
-        };
-        const t = tipos[tipo] || tipos.info;
-        const contenedorId = 'nm-toast-container';
-        let contenedor = document.getElementById(contenedorId);
-        if (!contenedor) {
-                contenedor = document.createElement('div');
-                contenedor.id = contenedorId;
-                contenedor.style.cssText = 'position:fixed; top:20px; right:20px; z-index:11000; display:flex; flex-direction:column; gap:10px;';
-                document.body.appendChild(contenedor);
-        }
-        const toast = document.createElement('div');
-        toast.className = `alert alert-${t.clase} shadow-sm mb-0 py-2 px-3`; 
-        toast.style.cssText = 'min-width:280px;';
-        toast.innerHTML = `
-                <div class="d-flex align-items-start">
-                        <i class="fas fa-${t.icon} me-2 mt-1"></i>
-                        <div class="flex-grow-1">${mensaje}</div>
-                        <button type="button" class="btn-close ms-2" style="font-size:10px" aria-label="Cerrar"></button>
-                </div>`;
-        toast.querySelector('.btn-close').onclick = () => toast.remove();
-        contenedor.appendChild(toast);
-        setTimeout(() => toast.remove(), 5500);
-}
-
-// Modal de confirmación personalizado para evitar 'localhost dice:'
-function mostrarConfirmacion(mensaje, onConfirm) {
-        const modalId = 'nm-confirm-modal';
-        let modalEl = document.getElementById(modalId);
-        if (modalEl) modalEl.remove();
-        modalEl = document.createElement('div');
-        modalEl.id = modalId;
-        modalEl.className = 'modal fade';
-        modalEl.innerHTML = `
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"><i class="fas fa-question-circle me-1"></i> Confirmar acción</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="mb-0">${mensaje}</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="button" class="btn btn-danger" id="nm-confirm-aceptar">Sí, continuar</button>
-                        </div>
-                    </div>
-                </div>`;
-        document.body.appendChild(modalEl);
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
-        modalEl.querySelector('#nm-confirm-aceptar').onclick = () => {
-                try { onConfirm && onConfirm(); } finally { modal.hide(); }
-        };
+    const notificacion = document.createElement('div');
+    const iconClass = tipo === 'success' ? 'check-circle' : 'exclamation-triangle';
+    const alertClass = tipo === 'success' ? 'success' : 'danger';
+    
+    notificacion.className = `alert alert-${alertClass} position-fixed`;
+    notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);';
+    notificacion.innerHTML = `
+        <i class="fas fa-${iconClass}"></i> ${mensaje}
+        <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+    `;
+    
+    document.body.appendChild(notificacion);
+    setTimeout(() => notificacion.remove(), 5000);
 }
 
 // ============================================================================
@@ -258,6 +212,7 @@ async function cargarPlantillas() {
     try {
         console.log('🔄 Cargando plantillas...');
         mostrarLoading(true);
+        
         const response = await axios.get('/personalizacion/canvas-editor/plantillas_disponibles/');
         const plantillas = response.data;
         
@@ -272,8 +227,6 @@ async function cargarPlantillas() {
         
         if (!plantillas || plantillas.length === 0) {
             container.innerHTML = '<p class="text-warning text-center p-3"><i class="fas fa-exclamation-triangle"></i><br>No hay plantillas disponibles</p>';
-            // Asegurar botones bloqueados cuando no hay plantillas
-            actualizarEstadoBotones(false);
             return;
         }
         
@@ -282,8 +235,6 @@ async function cargarPlantillas() {
         });
         
         console.log('✅ Plantillas renderizadas');
-        // Deshabilitar botones si no hay plantilla seleccionada
-        actualizarEstadoBotones();
         
     } catch (error) {
         console.error('❌ Error cargando plantillas:', error);
@@ -373,19 +324,6 @@ function seleccionarPlantilla(plantilla) {
     canvas.clear();
     cargarMarcoPlantilla(plantilla);
     generarControlesElementos();
-
-    // Actualizar estado de botones ahora que hay plantilla
-    actualizarEstadoBotones(true);
-}
-
-/**
- * Habilita o deshabilita los botones principales según si hay plantilla seleccionada
- */
-function actualizarEstadoBotones(enabled = false) {
-    const btnFinalizar = document.getElementById('btn-finalizar');
-    const btnGuardar = document.getElementById('btn-guardar');
-    if (btnFinalizar) btnFinalizar.disabled = !enabled;
-    if (btnGuardar) btnGuardar.disabled = !enabled;
 }
 
 /**
@@ -410,7 +348,7 @@ function cargarMarcoPlantilla(plantilla) {
     
     testImg.onerror = function() {
         console.error('❌ No se puede acceder a la imagen');
-        mostrarNotificacion('No se pudo cargar la imagen del marco. Verifica que el servidor Django esté corriendo.', 'error');
+        alert('No se pudo cargar la imagen del marco.\nVerifica que el servidor Django esté corriendo.');
         canvas.setBackgroundColor('#ffffff', canvas.renderAll.bind(canvas));
     };
     
@@ -571,7 +509,7 @@ function subirImagenPersonalizada(archivo) {
     if (!archivo) return;
     
     if (!archivo.type.startsWith('image/')) {
-        mostrarNotificacion('Por favor selecciona un archivo de imagen válido', 'warning');
+        alert('Por favor selecciona un archivo de imagen válido');
         return;
     }
     
@@ -598,7 +536,7 @@ function subirImagenPersonalizada(archivo) {
     
     reader.onerror = function() {
         console.error('❌ Error leyendo archivo');
-        mostrarNotificacion('Error al cargar la imagen', 'error');
+        alert('Error al cargar la imagen');
         mostrarLoading(false);
     };
     
@@ -610,7 +548,7 @@ function subirImagenPersonalizada(archivo) {
  */
 function aplicarImagenAlCanvas() {
     if (!imagenPersonalizadaActual) {
-        mostrarNotificacion('Primero sube una imagen', 'warning');
+        alert('Primero sube una imagen');
         return;
     }
     
@@ -658,7 +596,7 @@ function aplicarImagenAlCanvas() {
  */
 async function aplicarRecorteInteligente() {
     if (!imagenPersonalizadaActual) {
-        mostrarNotificacion('Primero sube una imagen', 'warning');
+        alert('Primero sube una imagen');
         return;
     }
     
@@ -754,7 +692,7 @@ async function aplicarRecorteInteligente() {
  */
 function ajustarImagenEnCanvas(modo) {
     if (!imagenEnCanvas) {
-        mostrarNotificacion('Primero aplica una imagen al canvas', 'warning');
+        alert('Primero aplica una imagen al canvas');
         return;
     }
     
@@ -925,11 +863,9 @@ function actualizarElemento(nombreParametro, valor) {
             if (objeto) {
                 objeto.set('text', valor);
             } else {
-                objeto = new fabric.Textbox(valor, {
+                objeto = new fabric.Text(valor, {
                     left: elemento.posicion_x,
                     top: elemento.posicion_y,
-                    width: elemento.ancho || 200,
-                    splitByGrapheme: false,
                     fontFamily: elemento.fuente || 'Arial',
                     fontSize: elemento.tamaño_fuente || 16,
                     fill: elemento.color || '#000000',
@@ -1057,7 +993,7 @@ function removerImagen(nombreParametro) {
  */
 async function procesarConRecorteInteligente(nombreParametro) {
     if (!imagenTemporal || imagenTemporal.nombreParametro !== nombreParametro) {
-        mostrarNotificacion('Primero sube una imagen para procesarla', 'warning');
+        alert('Primero sube una imagen para procesarla');
         return;
     }
     
@@ -1107,7 +1043,7 @@ let textoSeleccionado = null;
 function agregarTextoAlCanvas() {
     const texto = document.getElementById('textoInput').value.trim();
     if (!texto) {
-        mostrarNotificacion('Por favor, escribe un texto', 'warning');
+        alert('Por favor, escribe un texto');
         return;
     }
     
@@ -1130,11 +1066,9 @@ function agregarTextoAlCanvas() {
     estiloFuente += fuente;
     
     // Crear texto en Fabric.js
-    const fabricTexto = new fabric.Textbox(texto, {
+    const fabricTexto = new fabric.Text(texto, {
         left: canvasActivo.width / 2,
         top: canvasActivo.height / 2,
-        width: 250, // Ancho por defecto para permitir salto de línea
-        splitByGrapheme: false, // No romper palabras
         fontFamily: fuente,
         fontSize: tamaño,
         fill: color,
@@ -1230,7 +1164,7 @@ function actualizarTextoSeleccionado() {
  */
 async function guardarCarta() {
     if (!plantillaSeleccionada) {
-        mostrarNotificacion('Selecciona una plantilla primero', 'warning');
+        alert('Selecciona una plantilla primero');
         return null;
     }
     
@@ -1254,7 +1188,7 @@ async function guardarCarta() {
             parametros
         };
         
-    const response = await axios.post('/personalizacion/canvas-editor/guardar_carta_temporal/', data);
+        const response = await axios.post('/personalizacion/canvas-editor/guardar_carta_temporal/', data);
         
         // Guardar imágenes PNG de ambas caras si tenemos ID
         const cartaId = response.data?.carta_id;
@@ -1262,7 +1196,7 @@ async function guardarCarta() {
             await guardarImagenesCartas(cartaId);
         }
         
-        mostrarNotificacion('¡Carta guardada exitosamente como borrador!', 'success');
+        alert('¡Carta guardada exitosamente como borrador!');
         console.log('✅ Carta guardada:', response.data);
         
         return cartaId;
@@ -1270,7 +1204,7 @@ async function guardarCarta() {
     } catch (error) {
         console.error('❌ Error guardando carta:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Error desconocido';
-        mostrarNotificacion(`Error guardando la carta: ${errorMsg}`, 'error');
+        alert(`Error guardando la carta: ${errorMsg}`);
         return null;
     } finally {
         mostrarLoading(false);
@@ -1311,14 +1245,14 @@ async function guardarImagenesCartas(cartaId) {
  */
 async function finalizarCarta() {
     if (!plantillaSeleccionada) {
-        mostrarNotificacion('Selecciona una plantilla primero', 'warning');
+        alert('Selecciona una plantilla primero');
         return;
     }
     
     try {
         const nombreCarta = document.getElementById('nombreCarta').value.trim();
         if (!nombreCarta) {
-            mostrarNotificacion('Por favor, ingresa un nombre para la carta', 'warning');
+            alert('Por favor, ingresa un nombre para la carta');
             return;
         }
         
@@ -1352,13 +1286,13 @@ async function finalizarCarta() {
         // Finalizar la carta
         await axios.post(`/personalizacion/finalizar-carta/${cartaId}/`, {});
         
-        mostrarNotificacion('¡Carta finalizada exitosamente!', 'success');
+        alert('¡Carta finalizada exitosamente!');
         window.location.href = '/personalizacion/mis-cartas/';
         
     } catch (error) {
         console.error('❌ Error finalizando carta:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Error desconocido';
-        mostrarNotificacion(`Error al finalizar la carta: ${errorMsg}`, 'error');
+        alert(`Error al finalizar la carta: ${errorMsg}`);
     } finally {
         mostrarLoading(false);
     }
@@ -1376,7 +1310,7 @@ async function cargarCartaExistente(cartaId) {
         console.log('🔄 Cargando carta ID:', cartaId);
         mostrarLoading(true, 'Cargando carta...');
         
-    const response = await axios.get(`/personalizacion/cartas/${cartaId}/`);
+        const response = await axios.get(`/personalizacion/cartas/${cartaId}/`);
         const carta = response.data;
         
         console.log('✅ Carta cargada:', carta);
@@ -1407,7 +1341,7 @@ async function cargarCartaExistente(cartaId) {
         
     } catch (error) {
         console.error('❌ Error cargando carta:', error);
-        mostrarNotificacion('Error al cargar la carta. Intenta nuevamente.', 'error');
+        alert('Error al cargar la carta. Intenta nuevamente.');
     } finally {
         mostrarLoading(false);
     }
@@ -1502,11 +1436,13 @@ function cargarParametrosCarta(parametros) {
  * Limpia el canvas y todos los inputs
  */
 function limpiarCanvas() {
-    mostrarConfirmacion('¿Estás seguro de limpiar el canvas?', () => {
-        canvas.clear();
-        canvas.setBackgroundColor('#ffffff', canvas.renderAll.bind(canvas));
-        document.querySelectorAll('#elementosContainer input').forEach(input => { input.value = ''; });
-        mostrarNotificacion('Canvas limpio', 'info');
+    if (!confirm('¿Estás seguro de limpiar el canvas?')) return;
+    
+    canvas.clear();
+    canvas.setBackgroundColor('#ffffff', canvas.renderAll.bind(canvas));
+    
+    document.querySelectorAll('#elementosContainer input').forEach(input => {
+        input.value = '';
     });
 }
 

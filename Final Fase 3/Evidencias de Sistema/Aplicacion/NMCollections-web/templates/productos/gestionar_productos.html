@@ -1,6 +1,5 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% load humanize %}
 {% load formatting %}
 
 {% block title %}Gestionar Productos - NM Collections{% endblock %}
@@ -89,7 +88,7 @@
                         </td>
                         <td>{{ producto.nombre }}</td>
                         <td>{{ producto.categoria.nombre }}</td>
-                        <td>$ {{ producto.precio_base|floatformat:0|intcomma }}</td>
+                        <td>$ {{ producto.precio_base|miles }}</td>
                         <td>{{ producto.stock|default:"N/A" }}</td>
                         <td>
                             <span class="badge {% if producto.estado == 'activo' %}bg-success{% else %}bg-danger{% endif %}">

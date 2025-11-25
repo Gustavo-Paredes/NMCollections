@@ -5,7 +5,48 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/nm-dark-theme.css' %}">
-<link rel="stylesheet" href="{% static 'css/detalle_pedido_admin.css' %}">
+<style>
+    .detalle-container {
+        background: var(--gris-oscuro);
+        border-radius: 15px;
+        padding: 2rem;
+        border: 2px solid var(--verde-principal);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    
+    .info-card {
+        background: var(--negro-principal);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--gris-medio);
+    }
+    
+    .info-label {
+        color: var(--verde-principal);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-value {
+        color: white;
+        font-size: 1.1rem;
+    }
+    
+    .producto-item {
+        background: var(--negro-principal);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--verde-principal);
+    }
+    
+    .carta-preview {
+        max-width: 200px;
+        border-radius: 10px;
+        border: 2px solid var(--verde-principal);
+    }
+</style>
 {% endblock %}
 
 {% block content %}

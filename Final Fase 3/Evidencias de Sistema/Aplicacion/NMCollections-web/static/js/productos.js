@@ -82,31 +82,6 @@ function eliminarProducto(id) {
             tbody.appendChild(tr);
         }
     }).catch(() => {
-        mostrarNotificacion('Error al eliminar el producto', 'error');
+        alert('Error al eliminar el producto');
     });
-}
-
-// Notificación ligera (similar a canvas-editor)
-function mostrarNotificacion(mensaje, tipo = 'info') {
-    const tipos = {
-        success: { icon: 'check-circle', clase: 'success' },
-        error: { icon: 'times-circle', clase: 'danger' },
-        warning: { icon: 'exclamation-triangle', clase: 'warning' },
-        info: { icon: 'info-circle', clase: 'info' }
-    };
-    const t = tipos[tipo] || tipos.info;
-    let contenedor = document.getElementById('nm-toast-container');
-    if (!contenedor) {
-        contenedor = document.createElement('div');
-        contenedor.id = 'nm-toast-container';
-        contenedor.style.cssText = 'position:fixed; top:20px; right:20px; z-index:11000; display:flex; flex-direction:column; gap:10px;';
-        document.body.appendChild(contenedor);
-    }
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${t.clase} shadow-sm mb-0 py-2 px-3`; 
-    toast.style.cssText = 'min-width:260px;';
-    toast.innerHTML = `<div class=\"d-flex align-items-start\"><i class=\"fas fa-${t.icon} me-2 mt-1\"></i><div class=\"flex-grow-1\">${mensaje}</div><button type=\"button\" class=\"btn-close ms-2\" style=\"font-size:10px\" aria-label=\"Cerrar\"></button></div>`;
-    toast.querySelector('.btn-close').onclick = () => toast.remove();
-    contenedor.appendChild(toast);
-    setTimeout(() => toast.remove(), 5000);
 }

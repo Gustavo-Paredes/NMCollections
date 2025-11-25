@@ -1,4 +1,3 @@
-{% load humanize %}
 {% load formatting %}
 
 <!-- Modal para Checkout del Carrito -->
@@ -31,15 +30,15 @@
                                 <tr>
                                     <td>{{ item.producto.nombre }}</td>
                                     <td>{{ item.cantidad }}</td>
-                                    <td>$ {{ item.precio_unitario|floatformat:0|intcomma }}</td>
-                                    <td class="text-end">$ {{ item.subtotal|floatformat:0|intcomma }}</td>
+                                    <td>$ {{ item.precio_unitario|miles }}</td>
+                                    <td class="text-end">$ {{ item.subtotal|miles }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                    <td class="text-end"><strong class="text-primary">$ {{ total|floatformat:0|intcomma }}</strong></td>
+                                    <td class="text-end"><strong class="text-primary">$ {{ total|miles }}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>

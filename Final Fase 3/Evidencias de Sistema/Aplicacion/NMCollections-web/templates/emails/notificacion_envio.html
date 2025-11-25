@@ -27,6 +27,10 @@
             {% endif %}
             <p><strong>Dirección de envío:</strong><br>{{ pedido.direccion_envio }}</p>
         </div>
+        <p>Puedes rastrear tu pedido y ver más detalles haciendo clic en el siguiente botón:</p>
+        <p style="text-align: center;">
+            <a href="{{ site_url }}/pedidos/detalle/{{ pedido.numero_pedido }}/" class="btn">Rastrear Pedido</a>
+        </p>
     </div>
     <div class="footer">
         <p>© 2025 NM Collections</p>

@@ -1,6 +1,5 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% load humanize %}
 {% load formatting %}
 
 {% block title %}{{ producto.nombre }} - NM Collections{% endblock %}
@@ -61,7 +60,7 @@
                 <div class="producto-info">
                     <h2 class="producto-title">{{ producto.nombre }}</h2>
                     <p class="producto-categoria">{{ producto.categoria.nombre }}</p>
-                    <h4 class="producto-precio">$ {{ producto.precio_base|floatformat:0|intcomma }}</h4>
+                    <h4 class="producto-precio">$ {{ producto.precio_base|miles }}</h4>
                     
                     <div class="producto-descripcion">
                         {{ producto.descripcion|linebreaks }}

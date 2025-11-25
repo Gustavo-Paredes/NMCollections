@@ -33,17 +33,6 @@ class Pedido(BaseModel):
     fecha_envio = models.DateTimeField(null=True, blank=True, verbose_name='Fecha de envío')
     numero_seguimiento = models.CharField(max_length=100, blank=True, verbose_name='Número de seguimiento')
     
-    # Relación con subasta (si el pedido proviene de una subasta ganada)
-    subasta = models.ForeignKey(
-        'subastas.Subasta',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='pedidos',
-        verbose_name='Subasta',
-        help_text='Subasta asociada a este pedido (si aplica)'
-    )
-    
     class Meta:
         verbose_name = 'Pedido'
         verbose_name_plural = 'Pedidos'
@@ -101,13 +90,6 @@ class PedidoProducto(BaseModel):
         verbose_name='Carta Personalizada',
         help_text='Carta personalizada asociada a este producto del pedido'
     )
-    imagen_pedido = models.ImageField(
-        upload_to='pedidos/',
-        null=True,
-        blank=True,
-        verbose_name='Imagen del pedido',
-        help_text='Snapshot de la imagen (producto o carta personalizada) en el momento de la compra'
-    )
     precio_total = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Precio total')
     
     class Meta:
@@ -122,16 +104,6 @@ class PedidoProducto(BaseModel):
         # Calcular precio total automáticamente si no se especifica
         if not self.precio_total:
             self.precio_total = self.cantidad * self.producto.precio_base
-        # Intentar asignar imagen_pedido si está vacía
-        if not self.imagen_pedido:
-            try:
-                if self.carta_personalizada and getattr(self.carta_personalizada, 'imagen_frente', None):
-                    # Usar imagen de la carta personalizada
-                    self.imagen_pedido = self.carta_personalizada.imagen_frente
-                elif getattr(self.producto, 'imagen_referencia', None):
-                    self.imagen_pedido = self.producto.imagen_referencia
-            except Exception:
-                pass
         super().save(*args, **kwargs)
 
 

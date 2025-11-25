@@ -113,34 +113,12 @@ def iniciar_pago_webpay(pedido):
         session_id = str(pedido.usuario.id)
         amount = int(pedido.total)  # Monto en pesos chilenos (entero)
         
-        # Validar monto mínimo (WebPay requiere al menos 50 pesos)
-        if amount < 50:
-            logger.error(f"Monto muy bajo para WebPay: {amount}. Mínimo: 50")
-            print(f"[ERROR WebPay] Monto {amount} es menor al mínimo permitido (50)")
-            return None
-        
         # URL de retorno
         return_url = f"{settings.SITE_URL}/pagos/webpay/retorno/"
         
-        print(f"\n{'='*60}")
-        print(f"[DEBUG WebPay] Iniciando transacción")
-        print(f"{'='*60}")
-        print(f"  Environment: {settings.WEBPAY_ENVIRONMENT}")
-        print(f"  Commerce Code: {settings.WEBPAY_COMMERCE_CODE}")
-        print(f"  Buy Order: {buy_order}")
-        print(f"  Session ID: {session_id}")
-        print(f"  Amount: ${amount:,} CLP (type: {type(amount).__name__})")
-        print(f"  Return URL: {return_url}")
-        print(f"{'='*60}\n")
-
         # Crear transacción
         response = tx.create(buy_order, session_id, amount, return_url)
         
-        print(f"\n[DEBUG WebPay] Respuesta de Transbank:")
-        print(f"  Token: {response.get('token', 'N/A')[:50]}...")
-        print(f"  URL: {response.get('url', 'N/A')}")
-        print(f"  Response completo: {response}\n")
-
         # Crear registro de transacción
         transaccion = TransaccionPago.objects.create(
             pedido=pedido,
@@ -162,15 +140,6 @@ def iniciar_pago_webpay(pedido):
         }
     
     except Exception as e:
-        print(f"\n{'!'*60}")
-        print(f"[ERROR WebPay] Error al crear transacción")
-        print(f"{'!'*60}")
-        print(f"  Exception type: {type(e).__name__}")
-        print(f"  Exception message: {str(e)}")
-        print(f"  Exception args: {e.args}")
-        print(f"{'!'*60}\n")
-        import traceback
-        traceback.print_exc()
         logger.error(f"Error al iniciar pago con WebPay: {str(e)}")
         return None
 
@@ -230,12 +199,6 @@ def webpay_retorno(request):
                 pedido.notas = f"{pedido.notas}\nWebPay Auth Code: {response['authorization_code']}"
                 pedido.save()
                 
-                # Si el pedido está vinculado a una subasta, marcarla como finalizada
-                if pedido.subasta:
-                    pedido.subasta.estado = 'finalizada'
-                    pedido.subasta.save()
-                    logger.info(f"Subasta {pedido.subasta.id} marcada como finalizada tras pago exitoso")
-                
                 # Actualizar transacción
                 if transaccion:
                     transaccion.marcar_como_aprobada(codigo_autorizacion=response['authorization_code'])
@@ -270,7 +233,6 @@ def webpay_retorno(request):
                 }
                 
                 return redirect('pagos:pago_success')
-
             
             else:
                 # Pago rechazado o fallido

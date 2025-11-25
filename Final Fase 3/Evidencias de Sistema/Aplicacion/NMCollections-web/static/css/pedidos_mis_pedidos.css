@@ -1,69 +1,124 @@
-/* Mis Pedidos - Dark high-contrast layout */
+/* Mis Pedidos - Card layout */
 :root {
-  --mp-bg: #1e1f21;
-  --mp-card: #242628;
-  --mp-card-alt: #2b2d30;
-  --mp-border: #3d4145;
-  --mp-border-soft: rgba(255,255,255,0.08);
-  --mp-text: #f5f7f9;
-  --mp-muted: #9ba1a7;
-  --mp-accent: #33ff99;
-  --mp-danger: #ef5350;
-  --mp-warning: #ffb74d;
-  --mp-info: #64b5f6;
-  --mp-success: #81c784;
+  --pedido-card-bg: var(--gris-oscuro, #232b2b);
+  --pedido-card-border: rgba(255,255,255,0.06);
+  --pedido-text: var(--texto-blanco, #f3f3f3);
+  --pedido-muted: var(--texto-gris, #bcbcbc);
+}
+body {
+    margin: 0;
+    background: #585e60; 
+    color: #333;
+    padding-top: 70px; /* Ajusta este valor según la altura del header */
+}
+/* Two-column centered grid */
+.pedidos-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-body { background: var(--mp-bg); color: var(--mp-text); }
+@media (max-width: 992px) {
+  .pedidos-grid-2 {
+    grid-template-columns: 1fr;
+    max-width: 680px;
+  }
+}
 
-.dashboard-wrapper { padding-top: 1rem; }
+/* Card style for each order */
+.pedido-card {
+  background: var(--pedido-card-bg);
+  border: 1px solid var(--pedido-card-border);
+  border-radius: 12px;
+  padding: 16px;
+  color: var(--pedido-text);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-.pedidos-grid-2 { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:18px; }
+/* List layout */
+.pedidos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-@media (max-width: 600px){ .pedidos-grid-2 { grid-template-columns:1fr; } }
-
-.pedido-card { background:var(--mp-card); border:1px solid var(--mp-border); border-radius:14px; padding:18px 18px 16px; display:flex; flex-direction:column; gap:14px; position:relative; transition:background .25s,border-color .25s,transform .25s; }
-.pedido-card:hover { background:var(--mp-card-alt); border-color:var(--mp-accent); transform:translateY(-3px); box-shadow:0 8px 26px -6px rgba(0,0,0,.55); }
+.pedido-item {
+  background: var(--pedido-card-bg);
+  border: 1px solid var(--pedido-card-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: var(--pedido-text);
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 2fr minmax(240px, 1.2fr);
+  gap: 12px 16px;
+  align-items: start;
+}
 
 .pedido-head { display:flex; justify-content:space-between; align-items:center; }
-.pedido-num { font-weight:700; letter-spacing:.5px; font-size:.9rem; color:var(--mp-muted); }
 
-.pedido-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 14px; }
-.pedido-meta .meta-item { font-size:.8rem; color:var(--mp-muted); line-height:1.25rem; display:flex; align-items:center; gap:4px; }
+.pedido-num {
+  font-weight: 700;
+  font-size: 1rem;
+}
 
-.pedido-items { border-top:1px dashed var(--mp-border-soft); padding-top:10px; }
-.pedido-items .item-row { font-size:.75rem; color:var(--mp-muted); display:flex; gap:6px; align-items:center; }
+.pedido-meta { display:grid; grid-template-columns: 1fr 1fr; gap:8px 16px; }
 
-.pedido-actions { display:flex; gap:10px; margin-top:auto; }
-@media (max-width: 700px){ .pedido-actions { flex-direction:column; } }
+.pedido-meta .meta-item {
+  color: var(--pedido-muted);
+  font-size: 0.95rem;
+}
 
-/* Badges estados */
-.badge-estado { display:inline-block; padding:4px 10px; border-radius:20px; font-size:.65rem; font-weight:700; letter-spacing:.5px; box-shadow:0 0 0 1px rgba(0,0,0,.3); }
-.badge-pendiente { background:var(--mp-warning); color:#222; }
-.badge-confirmado { background:var(--mp-accent); color:#122; }
-.badge-enviado { background:var(--mp-info); color:#122; }
-.badge-entregado { background:var(--mp-success); color:#122; }
-.badge-cancelado { background:var(--mp-danger); color:#fff; }
+.pedido-items { border-top: 1px dashed var(--pedido-card-border); padding-top:10px; }
 
-/* Botones */
-.btn-dashboard { background:var(--mp-accent); color:#102a1e; font-weight:600; border:none; border-radius:8px; font-size:.75rem; padding:10px 14px; transition:filter .2s,background .2s; }
-.btn-dashboard:hover { background:#5dffb3; }
+.pedido-items .item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pedido-muted);
+  font-size: 0.95rem;
+}
 
-.btn-danger { font-size:.75rem; padding:10px 14px; border-radius:8px; }
+.pedido-actions { display:flex; gap:8px; }
+
+/* Align actions to end on wide screens */
+@media (min-width: 992px) {
+  .pedido-actions { justify-content: flex-end; }
+}
+
+/* Responsive: stack into rows on small screens */
+@media (max-width: 992px) {
+  .pedido-item {
+    grid-template-columns: 1fr;
+  }
+  .pedido-actions { width:100%; }
+}
+
+/* Estado badges (usar Bootstrap base y matizar colores) */
+.badge-estado {
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+.badge-pendiente { background: #ffc107; color: #1a1a1a; }
+.badge-confirmado { background: #00d17a; color: #0d0d0d; }
+.badge-enviado { background: #4dabf7; color: #0d0d0d; }
+.badge-entregado { background: #6ea8fe; color: #0d0d0d; }
+.badge-cancelado { background: #ff4d4f; color: #fff; }
+
+/* Buttons that match theme */
+.btn-dashboard { background: var(--verde-principal, #00ff88); color: #111; border: none; }
+.btn-dashboard:hover { filter: brightness(0.95); }
 
 /* Empty state */
-.pedidos-empty { background:var(--mp-card); border:1px solid var(--mp-border); border-radius:14px; color:var(--mp-text); }
-.pedidos-empty h4 { color:var(--mp-text); }
-.pedidos-empty p { color:var(--mp-muted); }
-
-/* Scrollbar subtle */
-::-webkit-scrollbar { width:8px; }
-::-webkit-scrollbar-track { background:var(--mp-bg); }
-::-webkit-scrollbar-thumb { background:#323538; border-radius:4px; }
-
-/* Accessibility contrast tweaks */
-.pedido-card a.btn { outline:none; }
-.pedido-card a.btn:focus-visible { box-shadow:0 0 0 3px rgba(51,255,153,0.45); }
-
-/* Print: simplify */
-@media print { body { background:#fff; } .pedido-card { box-shadow:none; border:1px solid #ccc; } }
+.pedidos-empty {
+  background: var(--pedido-card-bg);
+  border: 1px solid var(--pedido-card-border);
+  border-radius: 12px;
+  color: var(--pedido-text);
+}

@@ -35,7 +35,12 @@
                     <button class="nav-link" id="tab-texto" data-bs-toggle="pill" data-bs-target="#panel-texto" type="button" role="tab">
                         <i class="fas fa-font fa-lg"></i><br><span class="d-none d-md-inline">Texto</span>
                     </button>
-                    {# Tabs de Formas y Capas removidos según solicitud #}
+                    <button class="nav-link" id="tab-formas" data-bs-toggle="pill" data-bs-target="#panel-formas" type="button" role="tab" disabled>
+                        <i class="fas fa-shapes fa-lg"></i><br><span class="d-none d-md-inline">Formas</span>
+                    </button>
+                    <button class="nav-link" id="tab-capas" data-bs-toggle="pill" data-bs-target="#panel-capas" type="button" role="tab" disabled>
+                        <i class="fas fa-layer-group fa-lg"></i><br><span class="d-none d-md-inline">Capas</span>
+                    </button>
                 </nav>
                 <!-- Paneles de contenido -->
                 <div class="tab-content w-100 flex-grow-1" id="sidebarTabContent">
@@ -181,10 +186,15 @@
                             </div>
                         </div>
                     </div>
-                    {# Paneles de Formas y Capas removidos según solicitud #}
+                    <div class="tab-pane fade" id="panel-formas" role="tabpanel">
+                        <h6 class="mb-3 text-center"><i class="fas fa-shapes"></i> Formas</h6>
+                        <div id="formasContainer"><!-- Aquí puedes agregar controles para formas --></div>
+                    </div>
+                    <div class="tab-pane fade" id="panel-capas" role="tabpanel">
+                        <h6 class="mb-3 text-center"><i class="fas fa-layer-group"></i> Capas</h6>
+                        <div id="capasContainer"><!-- Aquí puedes mostrar la lista de capas del canvas --></div>
+                    </div>
                 </div>
-                <!-- Contenedor para controles de elementos de la plantilla -->
-                <div id="elementosContainer" class="w-100 mt-3 px-2"></div>
                 <!-- Control de escalado del marco -->
                 <div class="element-input w-100 mt-3" id="marcoControls" style="display: none;">
                     <label>Escalado del Marco</label>
@@ -195,10 +205,10 @@
                 </div>
                 <!-- Botones de acción -->
                 <div class="action-buttons w-100 mt-auto">
-                    <button id="btn-finalizar" class="btn nm-btn-primary w-100 mb-2" onclick="finalizarCarta()" disabled>
+                    <button class="btn nm-btn-primary w-100 mb-2" onclick="finalizarCarta()">
                         <i class="fas fa-check-circle"></i> Finalizar Carta
                     </button>
-                    <button id="btn-guardar" class="btn nm-btn-secondary w-100 mb-2" onclick="guardarCarta()" disabled>
+                    <button class="btn nm-btn-secondary w-100 mb-2" onclick="guardarCarta()">
                         <i class="fas fa-save"></i> Guardar Borrador
                     </button>
                     <button class="btn btn-danger w-100" onclick="limpiarCanvas()">
@@ -226,14 +236,6 @@
                         <canvas id="cardCanvas" class="card-canvas" width="320" height="420"></canvas>
                         <small class="text-muted mt-2">
                             <i class="fas fa-info-circle"></i> Cara delantera - 320x420px
-                        </small>
-                    </div>
-
-                    <!-- Canvas Reverso (opcional) -->
-                    <div id="canvas-reverso" class="canvas-wrapper-container" style="display: none; flex-direction: column; align-items: center;">
-                        <canvas id="cardCanvasReverso" class="card-canvas" width="320" height="420"></canvas>
-                        <small class="text-muted mt-2">
-                            <i class="fas fa-info-circle"></i> Cara posterior - 320x420px
                         </small>
                     </div>
 

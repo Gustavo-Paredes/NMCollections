@@ -1,30 +1,3 @@
-<<<<<<< HEAD:templates/personalizacion/mis_cartas_backup.html
-=======
-<<<<<<<< HEAD:templates/personalizacion/mis_cartas.html
-{% extends 'base/base.html' %}
-{% load static %}
-
-{% block title %}Mis Trading Cards - NM Collections{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/personalizacion_mis_cartas.css' %}">
-{% endblock %}
-
-{% block content %}
-<div class="container mt-5 mb-5">
-    <div class="dashboard-wrapper">
-        <!-- Header -->
-        <div class="dashboard-header mb-4">
-            <h1 class="dashboard-title">
-                <i class="fas fa-id-card"></i> Mis Trading Cards
-            </h1>
-            <p class="dashboard-subtitle">Gestiona tus borradores y cartas finalizadas</p>
-            <div class="text-end mt-3">
-                <a href="{% url 'personalizacion:canvas_editor' %}" class="nm-btn-primary">
-                    <i class="fas fa-plus"></i> Nueva Carta
-                </a>
-========
->>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -148,18 +121,11 @@
                         <i class="fas fa-cog"></i> Admin
                     </a>
                 </div>
-<<<<<<< HEAD:templates/personalizacion/mis_cartas_backup.html
             </div>
         </div>
     </div>
 
     <div class="container">
-=======
->>>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
-            </div>
-        </div>
-        {% csrf_token %}
->>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
         <!-- Mensajes de Django -->
         {% if messages %}
             {% for message in messages %}
@@ -179,15 +145,7 @@
             
             {% if borradores %}
                 {% for carta in borradores %}
-<<<<<<< HEAD:templates/personalizacion/mis_cartas_backup.html
                     <div class="carta-item carta-preview">
-=======
-<<<<<<<< HEAD:templates/personalizacion/mis_cartas.html
-                    <div class="carta-preview mb-3">
-========
-                    <div class="carta-item carta-preview">
->>>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
->>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
                         <div class="row align-items-center">
                             <div class="col-md-2 text-center">
                                 {% if carta.imagen_generada %}
@@ -262,15 +220,7 @@
             
             {% if finalizadas %}
                 {% for carta in finalizadas %}
-<<<<<<< HEAD:templates/personalizacion/mis_cartas_backup.html
                     <div class="carta-item carta-preview">
-=======
-<<<<<<<< HEAD:templates/personalizacion/mis_cartas.html
-                    <div class="carta-preview mb-3">
-========
-                    <div class="carta-item carta-preview">
->>>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
->>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
                         <div class="row align-items-center">
                             <div class="col-md-2 text-center">
                                 {% if carta.imagen_generada %}
@@ -300,31 +250,11 @@
                                 </span>
                             </div>
                             <div class="col-md-2 text-end carta-acciones">
-<<<<<<< HEAD:templates/personalizacion/mis_cartas_backup.html
-=======
-<<<<<<<< HEAD:templates/personalizacion/mis_cartas.html
-                                <button class="btn btn-info btn-sm me-1" onclick="verCarta({{ carta.id }})">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <form method="post" action="{% url 'carrito:agregar_carta_personalizada' carta.id %}" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-success btn-sm me-1">
-                                        <i class="fas fa-shopping-cart"></i> Al Carrito
-                                    </button>
-                                </form>
-                                <button class="btn btn-secondary btn-sm" onclick="duplicarCarta({{ carta.id }})">
-                                    <i class="fas fa-copy"></i>
-========
->>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
                                 <button class="btn btn-info btn-sm me-1" disabled>
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button class="btn btn-success btn-sm" disabled>
                                     <i class="fas fa-shopping-cart"></i>
-<<<<<<< HEAD:templates/personalizacion/mis_cartas_backup.html
-=======
->>>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
->>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html
                                 </button>
                             </div>
                         </div>
@@ -339,7 +269,6 @@
             {% endif %}
         </div>
     </div>
-<<<<<<< HEAD:templates/personalizacion/mis_cartas_backup.html
 
     <!-- Botón flotante para nueva carta -->
     <a href="/personalizacion/canvas-editor/" class="btn btn-primary floating-btn">
@@ -349,109 +278,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-=======
-</div>
-{% endblock %}
-{% block extra_js %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    
-    <script>
-        // Funciones para manejo de cartas
-        
-        function finalizarCarta(cartaId) {
-            if (confirm('¿Finalizar esta carta? No podrás editarla después.')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/personalizacion/finalizar_carta/${cartaId}/`;
-                
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrfmiddlewaretoken';
-                csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                
-                form.appendChild(csrfInput);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-        
-        function eliminarCarta(cartaId) {
-            if (confirm('¿Eliminar esta carta? Esta acción no se puede deshacer.')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/personalizacion/eliminar-carta/${cartaId}/`;
-                
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrfmiddlewaretoken';
-                csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                
-                form.appendChild(csrfInput);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-        
-        function verCarta(cartaId) {
-            // Implementar modal de vista previa o nueva página
-            window.open(`/personalizacion/vista-previa/${cartaId}/`, '_blank');
-        }
-        
-        function crearPedido(cartaId) {
-            if (confirm('¿Crear pedido para esta carta?\n\nEsto marcará la carta como "Comprada" y generará un pedido.')) {
-                // Mostrar indicador de carga
-                const btnElement = event.target;
-                const originalText = btnElement.innerHTML;
-                btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
-                btnElement.disabled = true;
-                
-                axios.post(`/personalizacion/crear-pedido/${cartaId}/`, {}, {
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                })
-                .then(response => {
-                    if (response.data.success) {
-                        alert(response.data.message || 'Pedido creado exitosamente');
-                        // Recargar la página para reflejar el cambio de estado
-                        window.location.reload();
-                    } else {
-                        alert('Error al crear pedido: ' + response.data.error);
-                        btnElement.innerHTML = originalText;
-                        btnElement.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al crear pedido. Revisa la consola para más detalles.');
-                    btnElement.innerHTML = originalText;
-                    btnElement.disabled = false;
-                });
-            }
-        }
-        
-        function duplicarCarta(cartaId) {
-            if (confirm('¿Duplicar esta carta como nuevo borrador?')) {
-                axios.post(`/personalizacion/duplicar-carta/${cartaId}/`, {}, {
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                })
-                .then(response => {
-                    if (response.data.success) {
-                        alert('Carta duplicada exitosamente');
-                        location.reload();
-                    } else {
-                        alert('Error al duplicar carta: ' + response.data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al duplicar carta');
-                });
-            }
-        }
-    </script>
-{% endblock %}
->>>>>>> main:NMCollections-web/templates/personalizacion/mis_cartas_backup.html

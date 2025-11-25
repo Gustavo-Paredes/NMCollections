@@ -1,6 +1,5 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% load humanize %}
 {% load formatting %}
 
 {% block title %}NM Collections - Inicio{% endblock %}
@@ -21,7 +20,7 @@
                             <h5 class="subasta-title">{{ subasta.producto.nombre }}</h5>
                             <ul class="list-unstyled small mb-3">
                                 <li><strong>Estado:</strong> <span class="subasta-estado">{{ subasta.get_estado_display }}</span></li>
-                                <li><strong>Precio inicial:</strong> <span class="subasta-precio">$ {{ subasta.precio_inicial|floatformat:0|intcomma }}</span></li>
+                                <li><strong>Precio inicial:</strong> <span class="subasta-precio">$ {{ subasta.precio_inicial|miles }}</span></li>
                                 <li><strong>Fecha inicio:</strong> <span class="subasta-fecha">{{ subasta.fecha_inicio|date:'d/m/Y H:i' }}</span></li>
                                 <li><strong>Fecha fin:</strong> <span class="subasta-fecha">{{ subasta.fecha_fin|date:'d/m/Y H:i' }}</span></li>
                                 

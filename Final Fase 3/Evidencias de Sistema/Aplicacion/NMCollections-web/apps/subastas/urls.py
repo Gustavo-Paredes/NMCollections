@@ -7,9 +7,6 @@ urlpatterns = [
     # Página principal de subastas
     path('', views.SubastaView.as_view(), name='subasta'),
     path('<int:subasta_id>/', views.SubastaDetalleView.as_view(), name='detalle'),
-    path('<int:subasta_id>/pagar/', views.pagar_subasta, name='pagar'),
-
-    path('editar/<int:subasta_id>/', views.editar_subasta, name='editar'),
     path('eliminar/<int:subasta_id>/', views.eliminar_subasta, name='eliminar'),
     path('admin/', views.SubastaAdminView.as_view(), name='admin_subastas'),
     

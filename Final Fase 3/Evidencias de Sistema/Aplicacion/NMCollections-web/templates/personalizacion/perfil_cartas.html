@@ -176,18 +176,12 @@
                                             <button class="btn btn-info btn-sm" onclick="verCarta({{ carta.id }})">
                                                 <i class="fas fa-eye"></i> Ver
                                             </button>
-<<<<<<< HEAD:templates/personalizacion/perfil_cartas.html
-                                            <button class="btn btn-success btn-sm" onclick="crearPedido({{ carta.id }})">
-                                                <i class="fas fa-shopping-cart"></i> Comprar
-                                            </button>
-=======
                                             <form method="post" action="{% url 'carrito:agregar_carta_personalizada' carta.id %}" style="display:inline;">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-success btn-sm">
                                                     <i class="fas fa-shopping-cart"></i> Al Carrito
                                                 </button>
                                             </form>
->>>>>>> main:NMCollections-web/templates/personalizacion/perfil_cartas.html
                                             <button class="btn btn-secondary btn-sm" onclick="duplicarCarta({{ carta.id }})">
                                                 <i class="fas fa-copy"></i> Duplicar
                                             </button>

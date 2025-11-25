@@ -4,8 +4,9 @@
 {% block title %}Detalle Pedido {{ pedido.numero_pedido }} - NM Collections{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/nm-dark-theme.css' %}">
-<link rel="stylesheet" href="{% static 'css/detalle_pedido.css' %}">
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/pedidos.css' %}">
+<link rel="stylesheet" href="{% static 'css/pedidos_detalle.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -51,14 +52,14 @@
             </div>
 
             <!-- Productos del pedido -->
-            <div class="card shadow-sm mt-4 productos-card">
+            <div class="card shadow-sm mt-4">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="mb-0">Productos</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
-                            <thead class="productos-header">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Producto</th>
                                     <th>Cantidad</th>
@@ -69,43 +70,20 @@
                             <tbody>
                                 {% for item in pedido.productos.all %}
                                 <tr>
-                                    <td class="align-middle">
-                                        <div class="d-flex flex-column gap-1">
-                                            <strong class="producto-nombre">{{ item.producto.nombre }}</strong>
-                                            {% if item.personalizacion %}
-                                                <div class="personalizacion-block">
-                                                    {% if item.personalizacion.imagen %}
-                                                        <div class="personalizacion-thumb">
-                                                            <img src="{{ item.personalizacion.imagen }}" alt="{{ item.personalizacion.nombre_carta|default:'Carta personalizada' }}" loading="lazy">
-                                                        </div>
-                                                    {% endif %}
-                                                    <div class="personalizacion-info">
-                                                        {% if item.carta_personalizada %}
-                                                            <span class="personalizacion-title"><i class="fas fa-palette me-1"></i>{{ item.carta_personalizada.nombre_carta }}</span>
-                                                        {% elif item.personalizacion.nombre_carta %}
-                                                            <span class="personalizacion-title"><i class="fas fa-palette me-1"></i>{{ item.personalizacion.nombre_carta }}</span>
-                                                        {% else %}
-                                                            <span class="personalizacion-title"><i class="fas fa-palette me-1"></i>Personalización aplicada</span>
-                                                        {% endif %}
-                                                        {% if item.personalizacion.parametros %}
-                                                            <small class="personalizacion-parametros text-muted">
-                                                                {% for param in item.personalizacion.parametros %}
-                                                                    {{ param.nombre }}: {{ param.valor }}{% if not forloop.last %}, {% endif %}
-                                                                {% endfor %}
-                                                            </small>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            {% endif %}
-                                        </div>
+                                    <td>
+                                        <strong>{{ item.producto.nombre }}</strong>
+                                        {% if item.personalizacion %}
+                                        <br>
+                                        <small class="text-muted">Personalización: {{ item.personalizacion }}</small>
+                                        {% endif %}
                                     </td>
-                                    <td class="align-middle">{{ item.cantidad }}</td>
-                                    <td class="align-middle">${{ item.producto.precio_base|floatformat:0 }}</td>
-                                    <td class="text-end align-middle"><strong>${{ item.precio_total|floatformat:0 }}</strong></td>
+                                    <td>{{ item.cantidad }}</td>
+                                    <td>${{ item.producto.precio_base|floatformat:0 }}</td>
+                                    <td class="text-end"><strong>${{ item.precio_total|floatformat:0 }}</strong></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
-                            <tfoot class="productos-footer">
+                            <tfoot class="table-light">
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>Total:</strong></td>
                                     <td class="text-end"><strong class="text-primary">${{ pedido.total|floatformat:0 }}</strong></td>
@@ -153,7 +131,7 @@
             <div class="action-buttons mt-4">
 
                 <div class="d-flex flex-wrap gap-2">
-                    {% comment %} {% if pedido.estado == 'pendiente' %}
+                    {% if pedido.estado == 'pendiente' %}
                         <button class="btn btn-success btn-custom" onclick="cambiarEstado('confirmado')">
                             <i class="fas fa-check"></i> Confirmar Pedido
                         </button>
@@ -171,7 +149,7 @@
                         <button class="btn btn-success btn-custom" onclick="cambiarEstado('entregado')">
                             <i class="fas fa-check-double"></i> Marcar como Entregado
                         </button>
-                    {% endif %} {% endcomment %}
+                    {% endif %}
 
                     <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-secondary btn-custom">
                         <i class="fas fa-list"></i> Ver Todos los Pedidos

@@ -51,21 +51,12 @@ def comprar_producto(request, producto_id):
                 }
             else:
                 personalizacion = None
-            # Intentar asociar carta personalizada si viene en personalizacion
-            carta_instance = None
-            if isinstance(personalizacion, dict) and 'carta_id' in personalizacion:
-                try:
-                    from apps.personalizacion.models import CartaPersonalizada
-                    carta_instance = CartaPersonalizada.objects.filter(id=personalizacion['carta_id']).first()
-                except Exception:
-                    carta_instance = None
             PedidoProducto.objects.create(
                 pedido=pedido,
                 producto=producto,
                 cantidad=cantidad,
                 precio_total=producto.precio_base * cantidad,
-                personalizacion=personalizacion,
-                carta_personalizada=carta_instance
+                personalizacion=personalizacion
             )
             pedido.calcular_total()
             if producto.stock is not None:
@@ -114,20 +105,12 @@ def comprar_carrito(request):
                     }
                 else:
                     personalizacion = None
-                carta_instance = None
-                if isinstance(item.personalizacion, dict) and 'carta_id' in item.personalizacion:
-                    try:
-                        from apps.personalizacion.models import CartaPersonalizada
-                        carta_instance = CartaPersonalizada.objects.filter(id=item.personalizacion['carta_id']).first()
-                    except Exception:
-                        carta_instance = None
                 PedidoProducto.objects.create(
                     pedido=pedido,
                     producto=item.producto,
                     cantidad=item.cantidad,
                     precio_total=item.subtotal,
-                    personalizacion=personalizacion,
-                    carta_personalizada=carta_instance
+                    personalizacion=personalizacion
                 )
                 if item.producto.stock is not None:
                     item.producto.stock -= item.cantidad
@@ -154,84 +137,36 @@ def comprar_subasta(request, subasta_id):
     """
     from apps.subastas.models import Subasta, Puja
     try:
-        # Buscar por id sin filtrar por estado para evitar errores cuando
-        # la subasta esté en 'en revisión' u otros estados derivados.
-        subasta = get_object_or_404(Subasta, id=subasta_id)
-
-        # Asegurarnos de tener el estado actualizado antes de validar
-        try:
-            subasta.actualizar_estado()
-        except Exception:
-            # No bloquear si la actualización falla por algún motivo
-            logger.warning(f"No se pudo actualizar estado de subasta {subasta_id}")
-        subasta.refresh_from_db()
-
-        # Obtener la puja ganadora y validar que el usuario sea el ganador
-        puja_ganadora = subasta.puja_ganadora
+        subasta = get_object_or_404(Subasta, id=subasta_id, estado='finalizada')
+        puja_ganadora = subasta.pujas.order_by('-monto').first()
         if not puja_ganadora or puja_ganadora.usuario != request.user:
-            messages.error(request, 'No eres el ganador de esta subasta')
-            return redirect('subastas:detalle', subasta_id=subasta_id)
-
-        # Aceptar pago si la subasta está en revisión o finalizada
-        if subasta.estado not in ['finalizada', 'en revisión']:
-            messages.error(request, 'La subasta aún no está disponible para pagar')
-            return redirect('subastas:detalle', subasta_id=subasta_id)
-
-        # Verificar si ya existe un pedido para este producto/subasta
+            return HttpResponseBadRequest('No eres el ganador de la subasta.')
         if Pedido.objects.filter(
             usuario=request.user,
             productos__producto=subasta.producto
         ).exists():
-            messages.info(request, 'Ya has realizado un pedido para esta subasta')
-            return redirect('usuarios:dashboard')
-
-        direccion_envio = request.POST.get('direccion_envio', '').strip()
-        if not direccion_envio:
-            messages.error(request, 'Debe ingresar una dirección de envío')
-            return redirect('subastas:detalle', subasta_id=subasta_id)
-
+            return HttpResponseBadRequest('Ya existe un pedido para esta subasta.')
         with transaction.atomic():
             pedido = Pedido.objects.create(
                 usuario=request.user,
-                metodo_pago='webpay',
-                direccion_envio=direccion_envio,
-                notas=f'Subasta ID: {subasta.id}',
-                estado=EstadoPedidoChoices.PENDIENTE
+                fecha_pedido=timezone.now(),
+                estado=EstadoPedidoChoices.PENDIENTE,
+                direccion_envio=request.POST.get('direccion_envio', '').strip()
             )
-
             PedidoProducto.objects.create(
                 pedido=pedido,
                 producto=subasta.producto,
                 cantidad=1,
                 precio_total=puja_ganadora.monto
             )
-
-            # Reducir stock si aplica
-            if subasta.producto.stock is not None:
-                subasta.producto.stock -= 1
-                subasta.producto.save()
-
             pedido.calcular_total()
-
-            HistorialEstadoPedido.objects.create(
-                pedido=pedido,
-                estado_anterior=None,
-                estado_nuevo=EstadoPedidoChoices.PENDIENTE,
-                usuario_cambio=request.user,
-                comentarios=f'Pedido creado - Subasta ganada #{subasta.id}'
-            )
-
-            # Iniciar pago WebPay
-            webpay_data = iniciar_pago_webpay(pedido)
-            if webpay_data:
-                return render(request, 'pagos/redirect_webpay.html', {
-                    'payment_url': webpay_data['url'],
-                    'payment_token': webpay_data['token']
-                })
-            else:
-                messages.error(request, 'Error al iniciar el pago')
-                return redirect('subastas:detalle', subasta_id=subasta_id)
-
+            
+            # Enviar correo con voucher
+            from apps.pedidos.emails import enviar_voucher_pedido
+            enviar_voucher_pedido(pedido)
+        
+        messages.success(request, f'Compra de subasta realizada. Pedido #{pedido.numero_pedido}')
+        return redirect('pedidos:detalle_pedido', numero_pedido=pedido.numero_pedido)
     except Exception as e:
         logger.error(f"Error al comprar subasta: {str(e)}")
         messages.error(request, 'Error al procesar la compra')
@@ -289,6 +224,41 @@ def acciones_masivas_pedidos(request):
         except Exception as e:
             logger.error(f"Error en eliminación masiva: {str(e)}")
             messages.error(request, 'Ocurrió un error al eliminar los pedidos')
+        actualizados = 0
+        for pedido in pedidos:
+            estado_anterior = pedido.estado
+            # Actualizar fechas específicas según el estado
+            if nuevo_estado == 'confirmado' and not pedido.fecha_confirmacion:
+                pedido.fecha_confirmacion = timezone.now()
+            elif nuevo_estado == 'enviado' and not pedido.fecha_envio:
+                pedido.fecha_envio = timezone.now()
+                if numero_seguimiento:
+                    pedido.numero_seguimiento = numero_seguimiento
+
+            pedido.estado = nuevo_estado
+            pedido.save()
+
+            # Registrar en historial
+            HistorialEstadoPedido.objects.create(
+                pedido=pedido,
+                estado_anterior=estado_anterior,
+                estado_nuevo=nuevo_estado,
+                usuario_cambio=request.user,
+                comentarios=f'Actualización masiva desde panel (antes: {estado_anterior})'
+            )
+
+            # Enviar correo según el estado
+            try:
+                if nuevo_estado == 'confirmado':
+                    enviar_confirmacion_pedido(pedido)
+                elif nuevo_estado == 'enviado':
+                    enviar_notificacion_envio(pedido)
+            except Exception as e:
+                logger.warning(f"No se pudo enviar notificación para pedido {pedido.id}: {str(e)}")
+
+            actualizados += 1
+
+        messages.success(request, f"Estado actualizado a '{nuevo_estado}' en {actualizados} pedidos.")
         return redirect('pedidos:panel_pedidos')
 
     messages.error(request, 'Acción masiva no reconocida.')
@@ -610,27 +580,10 @@ def descargar_pedido_pdf(request, pedido_id):
 
         # Preparar layout: con o sin imagen
         row_flowable = None
-        imagen_path = None
         if carta and getattr(carta, 'imagen_frente', None) and carta.imagen_frente:
             try:
-                imagen_path = carta.imagen_frente.path
-            except Exception:
-                imagen_path = None
-        elif getattr(item, 'imagen_pedido', None) and item.imagen_pedido:
-            try:
-                imagen_path = item.imagen_pedido.path
-            except Exception:
-                imagen_path = None
-        elif isinstance(getattr(item, 'personalizacion', None), dict) and item.personalizacion.get('imagen'):
-            # Intentar convertir URL a path local si pertenece a MEDIA_URL
-            from urllib.parse import urlparse
-            img_url = item.personalizacion.get('imagen')
-            if img_url and settings.MEDIA_URL in img_url:
-                rel_path = img_url.split(settings.MEDIA_URL, 1)[1]
-                imagen_path = settings.MEDIA_ROOT / rel_path if hasattr(settings, 'MEDIA_ROOT') else None
-        if imagen_path:
-            try:
-                img = Image(str(imagen_path))
+                img_path = carta.imagen_frente.path
+                img = Image(img_path)
                 # Limitar tamaño manteniendo proporción (aprox 2.5x3.5 inches)
                 img._restrictSize(2.5*inch, 3.5*inch)
 
@@ -1041,43 +994,33 @@ def comprar_subasta(request, subasta_id):
     Compra del ganador de una subasta
     """
     from apps.subastas.models import Subasta, Puja
+    
     try:
-        # Buscar por id sin filtrar por estado para evitar errores cuando
-        # la subasta esté en 'en revisión' u otros estados derivados.
-        subasta = get_object_or_404(Subasta, id=subasta_id)
-
-        # Asegurarnos de tener el estado actualizado antes de validar
-        try:
-            subasta.actualizar_estado()
-        except Exception:
-            logger.warning(f"No se pudo actualizar estado de subasta {subasta_id}")
-        subasta.refresh_from_db()
-
-        # Obtener la puja ganadora y validar que el usuario sea el ganador
-        puja_ganadora = subasta.puja_ganadora
+        subasta = get_object_or_404(Subasta, id=subasta_id, estado='finalizada')
+        
+        # Verificar que el usuario sea el ganador
+        puja_ganadora = subasta.pujas.order_by('-monto').first()
+        
         if not puja_ganadora or puja_ganadora.usuario != request.user:
             messages.error(request, 'No eres el ganador de esta subasta')
             return redirect('subastas:detalle', subasta_id=subasta_id)
-
-        # Aceptar pago si la subasta está en revisión o finalizada
-        if subasta.estado not in ['finalizada', 'en revisión']:
-            messages.error(request, 'La subasta aún no está disponible para pagar')
-            return redirect('subastas:detalle', subasta_id=subasta_id)
-
-        # Verificar si ya existe un pedido para este producto/subasta
+        
+        # Verificar si ya existe un pedido para esta subasta
         if Pedido.objects.filter(
             usuario=request.user,
             productos__producto=subasta.producto
         ).exists():
             messages.info(request, 'Ya has realizado un pedido para esta subasta')
             return redirect('usuarios:dashboard')
-
+        
         direccion_envio = request.POST.get('direccion_envio', '').strip()
+        
         if not direccion_envio:
             messages.error(request, 'Debe ingresar una dirección de envío')
             return redirect('subastas:detalle', subasta_id=subasta_id)
-
+        
         with transaction.atomic():
+            # Crear pedido
             pedido = Pedido.objects.create(
                 usuario=request.user,
                 metodo_pago='webpay',
@@ -1085,21 +1028,24 @@ def comprar_subasta(request, subasta_id):
                 notas=f'Subasta ID: {subasta.id}',
                 estado=EstadoPedidoChoices.PENDIENTE
             )
-
+            
+            # Agregar producto con precio de la puja ganadora
             PedidoProducto.objects.create(
                 pedido=pedido,
                 producto=subasta.producto,
                 cantidad=1,
                 precio_total=puja_ganadora.monto
             )
-
-            # Reducir stock si aplica
+            
+            # Reducir stock
             if subasta.producto.stock is not None:
                 subasta.producto.stock -= 1
                 subasta.producto.save()
-
+            
+            # Calcular total
             pedido.calcular_total()
-
+            
+            # Crear historial
             HistorialEstadoPedido.objects.create(
                 pedido=pedido,
                 estado_anterior=None,
@@ -1107,9 +1053,10 @@ def comprar_subasta(request, subasta_id):
                 usuario_cambio=request.user,
                 comentarios=f'Pedido creado - Subasta ganada #{subasta.id}'
             )
-
-            # Iniciar pago WebPay
+            
+            # Iniciar pago con WebPay
             webpay_data = iniciar_pago_webpay(pedido)
+            
             if webpay_data:
                 return render(request, 'pagos/redirect_webpay.html', {
                     'payment_url': webpay_data['url'],
@@ -1118,7 +1065,7 @@ def comprar_subasta(request, subasta_id):
             else:
                 messages.error(request, 'Error al iniciar el pago')
                 return redirect('subastas:detalle', subasta_id=subasta_id)
-
+    
     except Exception as e:
         logger.error(f"Error al comprar subasta: {str(e)}")
         messages.error(request, 'Error al procesar la compra')

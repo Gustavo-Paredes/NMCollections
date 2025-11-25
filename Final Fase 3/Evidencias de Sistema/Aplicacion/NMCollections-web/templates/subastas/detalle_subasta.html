@@ -1,6 +1,5 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% load humanize %}
 {% load formatting %}
 
 
@@ -19,9 +18,9 @@
                         {{ subasta.producto.nombre }}
                     </div>
                     <p><strong>Descripción:</strong> {{ subasta.producto.descripcion }}</p>
-                    <p><strong>Precio inicial:</strong> $ {{ subasta.precio_inicial|floatformat:0|intcomma }}</p>
+                    <p><strong>Precio inicial:</strong> $ {{ subasta.precio_inicial|miles }}</p>
                     
-                                        <p><strong>Precio actual:</strong> <span id="precio-actual-display">$ {{ subasta.precio_actual|floatformat:0|intcomma }}</span></p> 
+                                        <p><strong>Precio actual:</strong> <span id="precio-actual-display">$ {{ subasta.precio_actual|miles }}</span></p> 
                     
                     <p><strong>Estado:</strong> {{ subasta.get_estado_display }}</p>
                     <p><strong>Fecha inicio:</strong> {{ subasta.fecha_inicio}}</p>
@@ -35,10 +34,10 @@
                         ></span>
                     </li>
 
-                    {% if subasta.puja_ganadora and subasta.puja_ganadora.usuario == user and not subasta.esta_activa %}
+                    {% if subasta.estado == 'finalizada' and subasta.puja_ganadora and subasta.puja_ganadora.usuario == user %}
                     <div class="alert alert-success mt-3">
                         <h5><i class="fas fa-trophy"></i> ¡Felicitaciones! Has ganado esta subasta</h5>
-                        <p class="mb-2">Monto ganador: <strong>$ {{ subasta.puja_ganadora.monto|floatformat:0|intcomma }}</strong></p>
+                        <p class="mb-2">Monto ganador: <strong>$ {{ subasta.puja_ganadora.monto|miles }}</strong></p>
                         <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modalComprarSubasta{{ subasta.id }}">
                             <i class="fas fa-shopping-cart"></i> Completar Compra con Transbank
                         </button>
@@ -72,7 +71,7 @@
                                 {% for puja in pujas %}
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         {{ puja.usuario.first_name }} 
-                                        <span>$ {{ puja.monto|floatformat:0|intcomma }} - {{ puja.fecha|date:"d/m/Y H:i" }}</span>
+                                        <span>$ {{ puja.monto|miles }} - {{ puja.fecha|date:"d/m/Y H:i" }}</span>
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -105,7 +104,7 @@
 </div>
 
 <!-- Modal de Compra de Subasta -->
-{% if subasta.puja_ganadora and subasta.puja_ganadora.usuario == user and not subasta.esta_activa %}
+{% if subasta.estado == 'finalizada' and subasta.puja_ganadora and subasta.puja_ganadora.usuario == user %}
     {% include 'pedidos/modal_comprar_subasta.html' with subasta=subasta %}
 {% endif %}
 
@@ -114,18 +113,13 @@
 {% block extra_js %}
 <script>
 const subastaId = "{{ subasta.id }}";
-const currentUsername = "{{ user.username|default:'Anonimo' }}";
-const csrfElem = document.querySelector('[name=csrfmiddlewaretoken]');
-const csrfToken = csrfElem ? csrfElem.value : '';
+const currentUsername = "{{ user.username|default:'Anonimo' }}"; 
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 const chatBox = document.getElementById('chat-box');
 const chatForm = document.getElementById('chat-form');
 const pujasEnVivoDiv = document.getElementById('pujas-en-vivo');
 const precioActualDisplay = document.getElementById('precio-actual-display');
-const contadorTiempo = document.getElementById('contador-tiempo');
-
-let intervaloContador;
-let intervaloActualizacion;
 
 function formatCLP(n) {
     const num = Number(n);
@@ -133,183 +127,222 @@ function formatCLP(n) {
     return new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 }).format(Math.round(num));
 }
 
+// Elementos para el contador
+const contadorTiempo = document.getElementById('contador-tiempo');
+const fechaInicioStr = contadorTiempo ? contadorTiempo.getAttribute('data-fecha-inicio') : null;
+const fechaFinStr = contadorTiempo ? contadorTiempo.getAttribute('data-fecha-fin') : null;
+
+let intervaloContador;
+let intervaloActualizacion;
+
+// ===========================================
+// FUNCIONES DE ACTUALIZACIÓN CON ENDPOINTS
+// ===========================================
+
 async function cargarPujas() {
     try {
-        const resp = await fetch(`/subastas/api/${subastaId}/pujas/`);
-        const data = await resp.json();
-        if (!data || !data.success) return;
-        actualizarListaPujas(data.pujas);
-        if (precioActualDisplay) precioActualDisplay.textContent = '$ ' + formatCLP(data.precio_actual);
-
-        if (data.esta_activa === false) {
-            const botonPujar = document.querySelector('button[type="submit"]');
-            const inputMonto = document.querySelector('input[name="monto"]');
-            if (botonPujar) {
-                botonPujar.disabled = true;
-                botonPujar.textContent = "Subasta Finalizada";
-                botonPujar.classList.remove('subasta-btn');
-                botonPujar.classList.add('btn-secondary');
+        const response = await fetch(`/api/v1/subastas/${subastaId}/pujas/`);
+        const data = await response.json();
+        
+        if (data.success) {
+            actualizarListaPujas(data.pujas);
+            if (precioActualDisplay) {
+                precioActualDisplay.textContent = '$ ' + formatCLP(data.precio_actual);
             }
-            if (inputMonto) inputMonto.disabled = true;
-
-            const chatInput = chatForm.querySelector('input[name="mensaje"]');
-            const chatButton = chatForm.querySelector('button');
-            if (chatInput) { chatInput.disabled = true; chatInput.placeholder = "Chat cerrado"; }
-            if (chatButton) chatButton.disabled = true;
         }
-    } catch (e) {
-        console.error('Error cargarPujas', e);
+    } catch (error) {
+        console.error('Error al cargar pujas:', error);
     }
 }
 
 async function cargarMensajes() {
     try {
-        const resp = await fetch(`/subastas/api/${subastaId}/mensajes/`);
-        const data = await resp.json();
-        if (data && data.success) mostrarMensajes(data.mensajes);
-    } catch (e) {
-        console.error('Error cargarMensajes', e);
+        const response = await fetch(`/api/v1/subastas/${subastaId}/mensajes/`);
+        const data = await response.json();
+        
+        if (data.success) {
+            mostrarMensajes(data.mensajes);
+        }
+    } catch (error) {
+        console.error('Error al cargar mensajes:', error);
     }
-}
-
-function mostrarMensajes(mensajes) {
-    if (!chatBox) return;
-    chatBox.innerHTML = '';
-    if (!mensajes || mensajes.length === 0) {
-        chatBox.innerHTML = '<p class="text-center text-muted m-0 p-2 text-white-50"><em>Aún no hay mensajes.</em></p>';
-        return;
-    }
-    mensajes.forEach(msg => {
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('chat-message');
-        const isSelf = msg.usuario === currentUsername;
-        messageDiv.classList.add(isSelf ? 'self' : 'other');
-        messageDiv.innerHTML = `
-            <small style="color: #00c853;">${msg.usuario}:</small>
-            <span style="color: #fff; display: block;">${msg.mensaje}</span>
-        `;
-        chatBox.appendChild(messageDiv);
-    });
-    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 async function enviarMensaje(mensaje) {
     try {
         const formData = new FormData();
         formData.append('mensaje', mensaje);
-        const resp = await fetch(`/subastas/api/${subastaId}/enviar-mensaje/`, {
+        
+        const response = await fetch(`/api/v1/subastas/${subastaId}/enviar-mensaje/`, {
             method: 'POST',
-            headers: { 'X-CSRFToken': csrfToken },
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
             body: formData
         });
-        const data = await resp.json();
-        return data;
-    } catch (e) {
-        console.error('Error enviarMensaje', e);
-        return { success: false, error: String(e) };
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Recargar mensajes después de enviar
+            await cargarMensajes();
+        } else {
+            console.error('Error al enviar mensaje:', data.error);
+        }
+    } catch (error) {
+        console.error('Error al enviar mensaje:', error);
     }
 }
 
-// Protecciones cliente: bandera y dedupe corto
-let sendingMessage = false;
-let lastSentMessage = null;
-let lastSentAt = 0;
+function mostrarMensajes(mensajes) {
+    chatBox.innerHTML = '';
+    
+    if (mensajes && mensajes.length > 0) {
+        mensajes.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message');
+            
+            const isSelf = msg.usuario === currentUsername;
+            messageDiv.classList.add(isSelf ? 'self' : 'other');
+            
+            messageDiv.innerHTML = `
+                <small style="color: #00c853;">${msg.usuario}:</small> 
+                <span style="color: #fff; display: block;">${msg.mensaje}</span>
+            `;
+            
+            chatBox.appendChild(messageDiv);
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+    } else {
+        chatBox.innerHTML = '<p class="text-center text-muted m-0 p-2 text-white-50"><em>Aún no hay mensajes.</em></p>';
+    }
+}
 
+// Evento de envío de mensajes
 chatForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const mensajeInput = chatForm.querySelector('input[name="mensaje"]');
-    const sendButton = chatForm.querySelector('button[type="submit"]');
     const mensaje = mensajeInput.value.trim();
+    
     if (!mensaje) return;
-    if (sendingMessage) return;
-    const now = Date.now();
-    if (mensaje === lastSentMessage && (now - lastSentAt) < 3000) return;
-
-    sendingMessage = true;
-    if (sendButton) sendButton.disabled = true;
-    mensajeInput.disabled = true;
-    lastSentMessage = mensaje; lastSentAt = now;
-
-    const result = await enviarMensaje(mensaje);
-    if (result && result.success) {
-        mensajeInput.value = '';
-        await cargarMensajes();
-    } else {
-        if (result && result.error === 'duplicate') {
-            console.warn('Mensaje duplicado descartado por servidor.');
-        } else {
-            console.error('Error al enviar mensaje:', result ? result.error : 'unknown');
-        }
-    }
-
-    sendingMessage = false;
-    if (sendButton) sendButton.disabled = false;
-    mensajeInput.disabled = false;
+    
+    await enviarMensaje(mensaje);
+    mensajeInput.value = '';
 });
 
+// Función para renderizar las pujas
 function actualizarListaPujas(pujas) {
-    if (!pujasEnVivoDiv) return;
-    pujasEnVivoDiv.innerHTML = '';
-    if (!pujas || pujas.length === 0) {
-        const p = document.createElement('p'); p.id = 'no-pujas-placeholder'; p.textContent = 'Aún no hay pujas.'; pujasEnVivoDiv.appendChild(p); return;
+    pujasEnVivoDiv.innerHTML = ''; // Limpiar la lista actual
+    
+    if (pujas && pujas.length > 0) {
+        const ul = document.createElement('ul');
+        ul.classList.add('list-group');
+        
+        pujas.forEach(puja => {
+            const li = document.createElement('li');
+            li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+            li.innerHTML = `
+                <strong>${puja.usuario}</strong> 
+                <span>$ ${formatCLP(puja.monto)} - ${puja.fecha}</span>
+            `;
+            ul.appendChild(li);
+        });
+        
+        pujasEnVivoDiv.appendChild(ul);
+    } else {
+        // Mostrar mensaje si no hay pujas
+        const p = document.createElement('p');
+        p.id = "no-pujas-placeholder";
+        p.textContent = "Aún no hay pujas.";
+        pujasEnVivoDiv.appendChild(p);
     }
-    const ul = document.createElement('ul'); ul.classList.add('list-group');
-    pujas.forEach(puja => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-        li.innerHTML = `<strong>${puja.usuario}</strong> <span>$ ${formatCLP(puja.monto)} - ${puja.fecha}</span>`;
-        ul.appendChild(li);
-    });
-    pujasEnVivoDiv.appendChild(ul);
 }
 
+// Iniciar actualizaciones periódicas
 function iniciarActualizaciones() {
-    cargarPujas(); cargarMensajes();
-    intervaloActualizacion = setInterval(() => { cargarPujas(); cargarMensajes(); }, 3000);
+    // Cargar datos iniciales
+    cargarPujas();
+    cargarMensajes();
+    
+    // Actualizar cada 3 segundos
+    intervaloActualizacion = setInterval(() => {
+        cargarPujas();
+        cargarMensajes();
+    }, 3000);
 }
 
-// Contador
-const fechaInicioStr = contadorTiempo ? contadorTiempo.getAttribute('data-fecha-inicio') : null;
-const fechaFinStr = contadorTiempo ? contadorTiempo.getAttribute('data-fecha-fin') : null;
+// ===============================================
+// NUEVA FUNCIÓN DE CONTADOR DE TIEMPO
+// ===============================================
 
 function actualizarContador() {
-    if (!contadorTiempo || !fechaInicioStr || !fechaFinStr) return;
-    const ahora = Date.now();
+    if (!contadorTiempo || !fechaInicioStr || !fechaFinStr) {
+        // En este contexto, si los datos no existen, el elemento queda vacío.
+        return; 
+    } 
+
+    const ahora = new Date().getTime();
+    // Convertir las fechas de Django (string) a milisegundos
     const inicio = new Date(fechaInicioStr).getTime();
     const fin = new Date(fechaFinStr).getTime();
-    let tiempoRestante = 0; let mensaje = '';
-    if (ahora < inicio) { tiempoRestante = inicio - ahora; mensaje = '<strong>Empieza en:</strong> '; }
-    else if (ahora < fin) { tiempoRestante = fin - ahora; mensaje = '<strong>Termina en:</strong> '; }
-    else { mensaje = '<strong>Subasta Finalizada</strong>'; tiempoRestante = 0; clearInterval(intervaloContador); }
+    
+    let tiempoRestante = 0;
+    let mensaje = "";
+    let subastaActiva = false;
+
+    if (ahora < inicio) {
+            tiempoRestante = inicio - ahora;
+            mensaje = "<strong>Empieza en:</strong> ";
+            subastaActiva = false;
+        } else if (ahora < fin) {
+            tiempoRestante = fin - ahora;
+            mensaje = "<strong>Termina en:</strong> ";
+            subastaActiva = true;
+        } else {
+            mensaje = "<strong>Subasta Finalizada</strong>";
+            tiempoRestante = 0;
+            subastaActiva = false;
+            clearInterval(intervaloContador); // Detiene la cuenta
+        }
 
     if (tiempoRestante > 0) {
-        const dias = Math.floor(tiempoRestante / 86400000);
-        const horas = Math.floor((tiempoRestante % 86400000) / 3600000);
-        const minutos = Math.floor((tiempoRestante % 3600000) / 60000);
-        const segundos = Math.floor((tiempoRestante % 60000) / 1000);
+        // Cálculo del tiempo en días, horas, minutos y segundos
+        const dias = Math.floor(tiempoRestante / (1000 * 60 * 60 * 24));
+        const horas = Math.floor((tiempoRestante % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutos = Math.floor((tiempoRestante % (1000 * 60 * 60)) / (1000 * 60));
+        const segundos = Math.floor((tiempoRestante % (1000 * 60)) / 1000);
+
         let tiempoStr = '';
-        if (dias>0) tiempoStr += `${dias}d `; if (horas>0) tiempoStr += `${horas}h `; tiempoStr += `${minutos}m ${segundos}s`;
-        contadorTiempo.innerHTML = mensaje + tiempoStr;
+        if (dias > 0) tiempoStr += `${dias}d `;
+        if (horas > 0) tiempoStr += `${horas}h `;
+        tiempoStr += `${minutos}m ${segundos}s`;
+        
+        contadorTiempo.innerHTML = mensaje + tiempoStr; 
     } else {
+        // Muestra solo el mensaje "Subasta Finalizada"
         contadorTiempo.innerHTML = mensaje;
-        try {
-            const reloadKey = 'subasta_reloaded_' + subastaId;
-            if (!sessionStorage.getItem(reloadKey)) {
-                sessionStorage.setItem(reloadKey, '1');
-                setTimeout(() => {
-                    if (!document.hidden) { if (intervaloContador) clearInterval(intervaloContador); if (intervaloActualizacion) clearInterval(intervaloActualizacion); window.location.reload(); }
-                }, 1200);
-            }
-        } catch (e) {
-            setTimeout(() => { if (!document.hidden) { if (intervaloContador) clearInterval(intervaloContador); if (intervaloActualizacion) clearInterval(intervaloActualizacion); window.location.reload(); } }, 1200);
-        }
     }
 }
 
-// Inicializar
-if (contadorTiempo && fechaInicioStr && fechaFinStr) { actualizarContador(); intervaloContador = setInterval(actualizarContador, 1000); }
+// ===============================================
+// INICIO DEL CONTADOR Y MANEJO DE CHAT
+// ===============================================
+
+// Inicializa el contador si las fechas están disponibles
+if (contadorTiempo && fechaInicioStr && fechaFinStr) {
+    actualizarContador(); 
+    intervaloContador = setInterval(actualizarContador, 1000); // Actualiza cada segundo
+}
+
+// Iniciar las actualizaciones periódicas de pujas y mensajes
 iniciarActualizaciones();
 
-window.addEventListener('beforeunload', () => { if (intervaloContador) clearInterval(intervaloContador); if (intervaloActualizacion) clearInterval(intervaloActualizacion); });
+// Limpiar intervalos cuando el usuario sale de la página
+window.addEventListener('beforeunload', () => {
+    if (intervaloContador) clearInterval(intervaloContador);
+    if (intervaloActualizacion) clearInterval(intervaloActualizacion);
+});
 </script>
+
+
 {% endblock %}

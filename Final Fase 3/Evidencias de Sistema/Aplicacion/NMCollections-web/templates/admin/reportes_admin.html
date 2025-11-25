@@ -1,6 +1,5 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% load humanize %}
 {% load formatting %}
 
 {% block title %}Reportes de Ventas - NM Collections{% endblock %}
@@ -31,7 +30,7 @@
                 <div class="reporte-card card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Ventas Totales</h5>
-                        <p class="reporte-precio mb-0">${{ metrics.total_ventas|floatformat:0|intcomma }}</p>
+                        <p class="reporte-precio mb-0">${{ metrics.total_ventas|miles }}</p>
                     </div>
                 </div>
             </div>
@@ -39,7 +38,7 @@
                 <div class="reporte-card card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Pedidos Totales</h5>
-                        <p class="reporte-precio mb-0">{{ metrics.total_pedidos|floatformat:0|intcomma }}</p>
+                        <p class="reporte-precio mb-0">{{ metrics.total_pedidos|miles }}</p>
                     </div>
                 </div>
             </div>
@@ -47,7 +46,7 @@
                 <div class="reporte-card card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Pedidos Confirmados</h5>
-                        <p class="reporte-precio mb-0">{{ metrics.pedidos_confirmados|floatformat:0|intcomma }}</p>
+                        <p class="reporte-precio mb-0">{{ metrics.pedidos_confirmados|miles }}</p>
                     </div>
                 </div>
             </div>

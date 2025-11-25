@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from apps.core.models import BaseModel
-from django.contrib.humanize.templatetags.humanize import intcomma
 
 
 class Subasta(BaseModel):
@@ -15,7 +14,6 @@ class Subasta(BaseModel):
         ('finalizada', 'Finalizada'),
         ('cancelada', 'Cancelada'),
         ('retrasada', 'Retrasada'),
-        ('en revisión', 'En revisión'),
     ]
     
     producto = models.ForeignKey(
@@ -32,7 +30,7 @@ class Subasta(BaseModel):
     estado = models.CharField(
         max_length=20,
         choices=ESTADO_SUBASTA_CHOICES,
-        default='en preparación',
+        default='En preparación',
         verbose_name='Estado'
     )
     
@@ -72,39 +70,29 @@ class Subasta(BaseModel):
         """
         ahora = timezone.now()
 
-        # Normalizar y evitar re-procesar si ya está finalizada/cancelada
-        # NOTA: no bloqueamos el re-procesado cuando la subasta está 'en revisión'
-        # porque un admin podría editar las fechas y reactivar la subasta.
-        estado_norm = (self.estado or '').lower()
-        if any(k in estado_norm for k in ['cancelada', 'finalizada', 'cerrada']):
-            return  # no procesa subastas ya terminadas/canceladas
+        if self.estado == 'cancelada' or self.estado == 'cerrada':
+            return  # no toca subastas terminadas o canceladas
 
         # Si aún no empieza
         if ahora < self.fecha_inicio:
-            nuevo_estado = 'en preparación'
+            nuevo_estado = 'En preparación'
 
         # Si está entre fecha de inicio y fin
         elif self.fecha_inicio <= ahora <= self.fecha_fin:
             nuevo_estado = 'activa'
 
-        elif ahora > self.fecha_fin:
-            # Si ya terminó, marcamos como 'en revisión' para que el ganador pueda pagar
-            nuevo_estado = 'en revisión'
+        # Si ya terminó y tiene pujas o ganador, pasa a revisión
+        elif ahora > self.fecha_fin and not self.ganador:
+            nuevo_estado = 'En revisión'
 
-        # Si ya terminó y tiene un ganador confirmado, mantenemos 'en revisión' o 'finalizada'
+        # Si ya terminó y tiene un ganador confirmado, se cierra
         elif self.ganador:
-            nuevo_estado = 'finalizada'
+            nuevo_estado = 'cerrada'
 
         else:
             nuevo_estado = self.estado  # sin cambio
 
         if nuevo_estado != self.estado:
-            # Si cambiamos a 'en revisión' (terminó el tiempo), determinamos el ganador
-            if nuevo_estado == 'en revisión' and not self.ganador:
-                ultima_puja = self.pujas.order_by('-monto').first()
-                if ultima_puja and (not self.precio_reserva or ultima_puja.monto >= self.precio_reserva):
-                    self.ganador = ultima_puja.usuario
-            
             self.estado = nuevo_estado
             self.save()
     
@@ -134,14 +122,9 @@ class Subasta(BaseModel):
         ultima_puja = self.pujas.order_by('-monto').first()
         if ultima_puja and (not self.precio_reserva or ultima_puja.monto >= self.precio_reserva):
             self.ganador = ultima_puja.usuario
-        # Tras finalizar, colocamos la subasta en revisión para permitir el proceso de pago
-        self.estado = 'en revisión'
+        
+        self.estado = 'finalizada'
         self.save()
-
-    @property
-    def puja_ganadora(self):
-        """Retorna la puja ganadora (última por monto) o None"""
-        return self.pujas.order_by('-monto').first()
     
     def puede_pujar(self, usuario, monto):
         """Verifica si un usuario puede realizar una puja válida."""
@@ -195,11 +178,7 @@ class Puja(BaseModel):
         unique_together = ['subasta', 'usuario', 'monto']  # Evitar pujas duplicadas
     
     def __str__(self):
-        try:
-            monto_display = intcomma(int(self.monto))
-        except Exception:
-            monto_display = self.monto
-        return f"Puja de ${monto_display} por {self.usuario.email} en {self.subasta.producto.nombre}"
+        return f"Puja de ${self.monto} por {self.usuario.email} en {self.subasta.producto.nombre}"
     
     def save(self, *args, **kwargs):
         # Validar que la puja sea válida antes de guardarla

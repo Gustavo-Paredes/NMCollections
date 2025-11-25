@@ -1,60 +1,20 @@
-import logging
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from apps.personalizacion.models import CartaPersonalizada
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
-from django.contrib import messages
-from django.db.models import Sum
-
-from apps.carrito.models import Carrito, CarritoProducto
-from apps.personalizacion.models import CartaPersonalizada
-from apps.productos.models import CategoriaProducto, Producto
-
-logger = logging.getLogger(__name__)
-
-@login_required
-def ver_carrito(request):
-    """Vista principal del carrito de compras"""
-    carrito, created = Carrito.objects.get_or_create(
-        usuario=request.user,
-        estado='activo'
-    )
-    
-    items = carrito.productos.select_related('producto').all()
-    
-    # Calcular totales
-    subtotal = sum(item.subtotal for item in items)
-    total_items = sum(item.cantidad for item in items)
-    
-    # Costo de envío fijo (puedes cambiar esto por una lógica más compleja)
-    costo_envio = 1500 if subtotal > 0 else 0
-    
-    total = subtotal + costo_envio
-    
-    context = {
-        'carrito': carrito,
-        'items': items,
-        'subtotal': subtotal,
-        'total_items': total_items,
-        'costo_envio': costo_envio,
-        'total': total,
-    }
-    
-    return render(request, 'carrito/ver_carrito.html', context)
 
 @login_required
 @require_http_methods(["POST"])
+
 def agregar_carta_personalizada(request, carta_id):
     """
     Agrega una carta personalizada finalizada al carrito como producto único
     """
     try:
+        from apps.productos.models import CategoriaProducto, Producto
         carta = get_object_or_404(CartaPersonalizada, id=carta_id, usuario=request.user, estado='finalizada')
-        
         # Buscar si ya existe un producto único para esta carta
         producto_nombre = f"Carta Personalizada #{carta.id} - {carta.nombre_carta or 'Personalizada'}"
         producto_carta = Producto.objects.filter(nombre=producto_nombre, tipo='personalizado').first()
-        
         if not producto_carta:
             # Obtener o crear categoría
             categoria_carta, _ = CategoriaProducto.objects.get_or_create(
@@ -69,10 +29,8 @@ def agregar_carta_personalizada(request, carta_id):
                 tipo='personalizado',
                 estado='activo'
             )
-            
         # Obtener o crear carrito activo
         carrito, _ = Carrito.objects.get_or_create(usuario=request.user, estado='activo')
-        
         # Verificar si el producto ya está en el carrito
         item_carrito, item_created = CarritoProducto.objects.get_or_create(
             carrito=carrito,
@@ -93,18 +51,55 @@ def agregar_carta_personalizada(request, carta_id):
                 }
             }
         )
-        
         if not item_created:
             item_carrito.cantidad += 1
             item_carrito.save()
-            
         messages.success(request, 'Carta personalizada agregada al carrito')
         return redirect('carrito:ver_carrito')
-        
     except Exception as e:
-        logger.error(f"Error al agregar carta personalizada al carrito: {str(e)}")
+        import logging
+        logging.error(f"Error al agregar carta personalizada al carrito: {str(e)}")
         messages.error(request, 'Error al agregar la carta personalizada al carrito')
         return redirect('personalizacion:mis_cartas')
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from django.contrib import messages
+from django.db.models import Sum, F
+
+from apps.carrito.models import Carrito, CarritoProducto
+from apps.productos.models import Producto
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+@login_required
+def ver_carrito(request):
+    """Vista principal del carrito de compras"""
+    carrito, created = Carrito.objects.get_or_create(
+        usuario=request.user,
+        estado='activo'
+    )
+    
+    items = carrito.productos.select_related('producto').all()
+    
+    # Calcular totales
+    subtotal = sum(item.subtotal for item in items)
+    total_items = sum(item.cantidad for item in items)
+    
+    context = {
+        'carrito': carrito,
+        'items': items,
+        'subtotal': subtotal,
+        'total_items': total_items,
+        'total': subtotal,  # Aquí podrías agregar costos de envío, descuentos, etc.
+    }
+    
+    return render(request, 'carrito/ver_carrito.html', context)
+
 
 @login_required
 @require_http_methods(["POST"])
@@ -138,7 +133,6 @@ def agregar_al_carrito(request, producto_id):
                 'producto_id': producto.id,
                 'nombre_producto': producto.nombre
             }
-            
         item_carrito, item_created = CarritoProducto.objects.get_or_create(
             carrito=carrito,
             producto=producto,
@@ -172,6 +166,7 @@ def agregar_al_carrito(request, producto_id):
         logger.error(f"Error al agregar producto al carrito: {str(e)}")
         messages.error(request, 'Error al agregar el producto al carrito')
         return redirect('productos:detalle', producto_id=producto_id)
+
 
 @login_required
 @require_http_methods(["POST"])
@@ -207,6 +202,7 @@ def actualizar_cantidad(request, item_id):
         messages.error(request, 'Error al actualizar la cantidad')
         return redirect('carrito:ver_carrito')
 
+
 @login_required
 @require_http_methods(["POST"])
 def eliminar_del_carrito(request, item_id):
@@ -230,6 +226,8 @@ def eliminar_del_carrito(request, item_id):
         messages.error(request, 'Error al eliminar el producto')
         return redirect('carrito:ver_carrito')
 
+
+
 @login_required
 @require_http_methods(["POST"])
 def vaciar_carrito(request):
@@ -250,6 +248,7 @@ def vaciar_carrito(request):
         logger.error(f"Error al vaciar carrito: {str(e)}")
         messages.error(request, 'Error al vaciar el carrito')
         return redirect('carrito:ver_carrito')
+
 
 @login_required
 def obtener_cantidad_carrito(request):
