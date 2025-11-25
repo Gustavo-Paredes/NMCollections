@@ -1,0 +1,310 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Mis Trading Cards - NM Collections{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/nm-dark-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/personalizacion_perfil_cartas.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navbar -->
+    {% include 'base/navbar.html' %}
+
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="mb-4">
+                        <i class="fas fa-id-card text-primary"></i> 
+                        Mis Trading Cards
+                    </h1>
+                    
+                    <!-- Estadísticas -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-center border-warning">
+                                <div class="card-body">
+                                    <h3 class="text-warning">{{ cartas_borrador.count }}</h3>
+                                    <small>Borradores</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center border-success">
+                                <div class="card-body">
+                                    <h3 class="text-success">{{ cartas_finalizadas.count }}</h3>
+                                    <small>Finalizadas</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center border-info">
+                                <div class="card-body">
+                                    <h3 class="text-info">{{ cartas_borrador.count|add:cartas_finalizadas.count }}</h3>
+                                    <small>Total</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center border-primary">
+                                <div class="card-body">
+                                    <a href="{% url 'personalizacion:canvas_editor' %}" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Nueva Carta
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pestañas -->
+            <ul class="nav nav-tabs" id="cartasTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="borradores-tab" data-bs-toggle="tab" data-bs-target="#borradores" type="button" role="tab">
+                        <i class="fas fa-edit"></i> Borradores ({{ cartas_borrador.count }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="finalizadas-tab" data-bs-toggle="tab" data-bs-target="#finalizadas" type="button" role="tab">
+                        <i class="fas fa-check-circle"></i> Finalizadas ({{ cartas_finalizadas.count }})
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Contenido de pestañas -->
+            <div class="tab-content" id="cartasTabContent">
+                <!-- Borradores -->
+                <div class="tab-pane fade show active" id="borradores" role="tabpanel">
+                    <div class="mt-4">
+                        {% if cartas_borrador %}
+                            {% for carta in cartas_borrador %}
+                                <div class="card-item card-borrador carta-preview">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2 text-center">
+                                            {% if carta.imagen_generada %}
+                                                <img src="{{ carta.imagen_generada.url }}" 
+                                                     alt="{{ carta.nombre_carta|default:'Carta sin nombre' }}"
+                                                     class="carta-imagen">
+                                            {% else %}
+                                                <div class="carta-placeholder">
+                                                    <i class="fas fa-image"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>
+                                                <i class="fas fa-id-card"></i> {{ carta.nombre_carta }}
+                                                <span class="carta-estado estado-borrador">Borrador</span>
+                                            </h5>
+                                            <p class="text-muted mb-2">
+                                                <i class="fas fa-layer-group"></i> 
+                                                {{ carta.plantilla.nombre }}
+                                            </p>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> 
+                                                Creada: {{ carta.fecha_creacion|date:"d/m/Y H:i" }}
+                                            </small>
+                                        </div>
+                                        <div class="col-md-4 text-end carta-acciones">
+                                            <a href="{% url 'personalizacion:canvas_editor' %}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </a>
+                                            <button class="btn btn-success btn-sm" onclick="finalizarCarta({{ carta.id }})">
+                                                <i class="fas fa-check"></i> Finalizar
+                                            </button>
+                                            <button class="btn btn-danger btn-sm" onclick="eliminarCarta({{ carta.id }})">
+                                                <i class="fas fa-trash"></i> Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-edit"></i>
+                                <h4>No tienes borradores</h4>
+                                <p>Comienza a crear tu primera trading card</p>
+                                <a href="{% url 'personalizacion:canvas_editor' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Crear Primera Carta
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Finalizadas -->
+                <div class="tab-pane fade" id="finalizadas" role="tabpanel">
+                    <div class="mt-4">
+                        {% if cartas_finalizadas %}
+                            {% for carta in cartas_finalizadas %}
+                                <div class="card-item card-finalizada carta-preview">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2 text-center">
+                                            {% if carta.imagen_generada %}
+                                                <img src="{{ carta.imagen_generada.url }}" 
+                                                     alt="{{ carta.nombre_carta|default:'Carta sin nombre' }}"
+                                                     class="carta-imagen">
+                                            {% else %}
+                                                <div class="carta-placeholder">
+                                                    <i class="fas fa-image"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>
+                                                <i class="fas fa-id-card"></i> {{ carta.nombre_carta }}
+                                                <span class="carta-estado estado-finalizada">Finalizada</span>
+                                            </h5>
+                                            <p class="text-muted mb-2">
+                                                <i class="fas fa-layer-group"></i> 
+                                                {{ carta.plantilla.nombre }}
+                                            </p>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> 
+                                                Finalizada: {{ carta.fecha_actualizacion|date:"d/m/Y H:i" }}
+                                            </small>
+                                        </div>
+                                        <div class="col-md-4 text-end carta-acciones">
+                                            <button class="btn btn-info btn-sm" onclick="verCarta({{ carta.id }})">
+                                                <i class="fas fa-eye"></i> Ver
+                                            </button>
+<<<<<<< HEAD:templates/personalizacion/perfil_cartas.html
+                                            <button class="btn btn-success btn-sm" onclick="crearPedido({{ carta.id }})">
+                                                <i class="fas fa-shopping-cart"></i> Comprar
+                                            </button>
+=======
+                                            <form method="post" action="{% url 'carrito:agregar_carta_personalizada' carta.id %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-shopping-cart"></i> Al Carrito
+                                                </button>
+                                            </form>
+>>>>>>> main:NMCollections-web/templates/personalizacion/perfil_cartas.html
+                                            <button class="btn btn-secondary btn-sm" onclick="duplicarCarta({{ carta.id }})">
+                                                <i class="fas fa-copy"></i> Duplicar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-check-circle"></i>
+                                <h4>No tienes cartas finalizadas</h4>
+                                <p>Finaliza tus borradores para poder comprarlas</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript para funcionalidades -->
+    <script>
+        // Configurar CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        const csrftoken = getCookie('csrftoken');
+        axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+        
+        function mostrarLoading(show = true) {
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+        }
+        
+        async function finalizarCarta(cartaId) {
+            if (!confirm('¿Finalizar esta carta? No podrás editarla después.')) return;
+            
+            try {
+                mostrarLoading(true);
+                const response = await axios.post(`/personalizacion/cartas/${cartaId}/finalizar/`);
+                mostrarLoading(false);
+                alert('¡Carta finalizada exitosamente!');
+                location.reload();
+            } catch (error) {
+                mostrarLoading(false);
+                console.error('Error finalizando carta:', error);
+                alert('Error finalizando la carta');
+            }
+        }
+        
+        async function eliminarCarta(cartaId) {
+            if (!confirm('¿Eliminar esta carta permanentemente?')) return;
+            
+            try {
+                mostrarLoading(true);
+                const response = await axios.delete(`/personalizacion/cartas/${cartaId}/`);
+                mostrarLoading(false);
+                alert('Carta eliminada exitosamente');
+                location.reload();
+            } catch (error) {
+                mostrarLoading(false);
+                console.error('Error eliminando carta:', error);
+                alert('Error eliminando la carta');
+            }
+        }
+        
+        async function crearPedido(cartaId) {
+            if (!confirm('¿Crear pedido para esta carta?')) return;
+            
+            try {
+                mostrarLoading(true);
+                const response = await axios.post(`/personalizacion/cartas/${cartaId}/crear_pedido/`);
+                mostrarLoading(false);
+                
+                const data = response.data;
+                alert(`¡Pedido creado exitosamente!\n\nNúmero: ${data.numero_pedido}\nProducto: ${data.producto}\nTotal: $${data.total}`);
+                
+                // Redirigir a página de pedidos si existe
+                // window.location.href = '/pedidos/';
+                
+            } catch (error) {
+                mostrarLoading(false);
+                console.error('Error creando pedido:', error);
+                if (error.response && error.response.data && error.response.data.error) {
+                    alert(`Error: ${error.response.data.error}`);
+                } else {
+                    alert('Error creando el pedido');
+                }
+            }
+        }
+        
+        function verCarta(cartaId) {
+            // Funcionalidad para ver carta (por implementar)
+            alert('Funcionalidad de vista previa en desarrollo...');
+        }
+        
+        function duplicarCarta(cartaId) {
+            // Funcionalidad para duplicar carta (por implementar)
+            alert('Funcionalidad de duplicar en desarrollo...');
+        }
+    </script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% endblock %}

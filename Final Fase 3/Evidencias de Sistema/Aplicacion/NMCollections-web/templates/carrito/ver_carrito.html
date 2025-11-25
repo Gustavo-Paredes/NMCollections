@@ -1,0 +1,208 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load formatting %}
+
+{% block title %}Mi Carrito - NM Collections{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/nm-dark-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/carrito.css' %}">
+<link rel="stylesheet" href="{% static 'css/ver_carrito.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container carrito-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="producto-title">
+                <i class="fas fa-shopping-cart me-2" style="color: #00c853;"></i>Mi Carrito de Compras
+            </h2>
+            {% if total_items > 0 %}
+            <p class="text-muted">{{ total_items }} producto{{ total_items|pluralize }} en tu carrito</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if items %}
+    <div class="row">
+        <!-- Columna de items del carrito -->
+        <div class="col-lg-8">
+            {% for item in items %}
+            <div class="carrito-item">
+                <div class="row align-items-center">
+                    <!-- Imagen del producto -->
+                    <div class="col-md-2 col-4">
+                        {% if item.personalizacion and item.personalizacion.imagen %}
+                            <!-- Imagen de carta personalizada -->
+                            <img src="{{ item.personalizacion.imagen }}" 
+                                 alt="{{ item.producto.nombre }}" 
+                                 class="carrito-imagen"
+                                 style="object-fit: contain; background-color: transparent;">
+                        {% elif item.producto.imagen_referencia %}
+                            <!-- Imagen de producto normal -->
+                            <img src="{{ item.producto.imagen_referencia.url }}" 
+                                 alt="{{ item.producto.nombre }}" 
+                                 class="carrito-imagen">
+                        {% else %}
+                            <!-- Sin imagen -->
+                            <img src="{% static 'img/icons/no-image.png' %}" 
+                                 alt="Sin imagen" 
+                                 class="carrito-imagen">
+                        {% endif %}
+                    </div>
+
+                    <!-- Info del producto -->
+                    <div class="col-md-4 col-8">
+                        <h5 class="mb-1">
+                            <a href="{% if item.producto.tipo == 'personalizado' %}#{% else %}{% url 'productos:detalle' producto_id=item.producto.id %}{% endif %}" 
+                               class="text-decoration-none text-dark">
+                                {% if item.personalizacion and item.personalizacion.nombre_carta %}
+                                    {{ item.personalizacion.nombre_carta }}
+                                {% else %}
+                                    {{ item.producto.nombre }}
+                                {% endif %}
+                            </a>
+                        </h5>
+                        
+                        {% if item.producto.tipo == 'personalizado' %}
+                            <span class="badge bg-success mb-2">Carta Personalizada</span>
+                        {% else %}
+                            <p class="text-muted mb-1 small">{{ item.producto.categoria.nombre }}</p>
+                        {% endif %}
+                        
+                        <p class="mb-0 text-primary"><strong>$ {{ item.precio_unitario|floatformat:0|intcomma }}</strong></p>
+                    </div>
+
+                    <!-- Control de cantidad -->
+                    <div class="col-md-3 col-6 mt-3 mt-md-0">
+                        <form method="POST" action="{% url 'carrito:actualizar_cantidad' item.id %}" class="cantidad-control d-flex align-items-center">
+                            {% csrf_token %}
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="decrementarCantidad(this)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" 
+                                   name="cantidad" 
+                                   value="{{ item.cantidad }}" 
+                                   min="1" 
+                                   max="{{ item.producto.stock|default:999 }}"
+                                   class="form-control cantidad-input mx-2"
+                                   onchange="this.form.submit()">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="incrementarCantidad(this)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </form>
+                        {% if item.producto.stock %}
+                        <small class="text-muted d-block mt-1 text-center">Stock: {{ item.producto.stock }}</small>
+                        {% endif %}
+                    </div>
+
+                    <!-- Subtotal y eliminar -->
+                    <div class="col-md-2 col-6 mt-3 mt-md-0 text-end">
+                        <h5 class="mb-2 text-primary">$ {{ item.subtotal|floatformat:0|intcomma }}</h5>
+                        <form method="POST" action="{% url 'carrito:eliminar' item.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Botón vaciar carrito -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <a href="{% url 'core:catalogo' %}" class="btn nm-btn-outline">
+                    <i class="fas fa-arrow-left me-2"></i>Seguir Comprando
+                </a>
+                <form method="POST" action="{% url 'carrito:vaciar' %}" class="d-inline" onsubmit="return confirm('¿Estás seguro de vaciar el carrito?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="fas fa-trash-alt me-2"></i>Vaciar Carrito
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Resumen del carrito -->
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="resumen-carrito">
+                <h4 class="mb-4" style="color: #00c853;">
+                    <i class="fas fa-receipt me-2"></i>Resumen del Pedido
+                </h4>
+                
+                <div class="mb-3 pb-3" style="border-bottom: 1px solid #444;">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-white">Subtotal:</span>
+                        <strong class="text-white">$ {{ subtotal|floatformat:0|intcomma }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-white">Envío:</span>
+                        <span class="text-warning">$ {{ costo_envio|floatformat:0|intcomma }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="text-white">Total:</h5>
+                        <h4 class="text-primary"><strong>$ {{ total|floatformat:0|intcomma }}</strong></h4>
+                    </div>
+                    <small class="text-muted">+ costos de envío</small>
+                </div>
+
+                <button type="button" class="btn nm-btn-primary w-100 mb-3" data-bs-toggle="modal" data-bs-target="#modalCheckoutCarrito">
+                    <i class="fas fa-credit-card me-2"></i>Finalizar Compra
+                </button>
+
+                <div class="text-center text-muted">
+                    <i class="fas fa-lock me-2"></i>
+                    <small>Pago seguro con Transbank</small>
+                </div>
+
+                <!-- Beneficios -->
+                <div class="mt-4 pt-3 text-muted" style="border-top: 1px solid #444;">
+                    <div class="mb-2">
+                        <i class="fas fa-shipping-fast me-2 text-primary"></i>
+                        <small>Envío a todo Santiago</small>
+                    </div>
+                    <div class="mb-2">
+                        <i class="fas fa-shield-alt me-2 text-primary"></i>
+                        <small>Compra protegida</small>
+                    </div>
+                    <div>
+                        <i class="fas fa-undo me-2 text-primary"></i>
+                        <small>Devolución gratis</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Checkout -->
+    {% include 'pedidos/modal_checkout_carrito.html' %}
+
+    {% else %}
+    <!-- Carrito vacío -->
+    <div class="row">
+        <div class="col-12">
+            <div class="carrito-vacio">
+                <i class="fas fa-shopping-cart"></i>
+                <h3 class="mb-3 text-white">Tu carrito está vacío</h3>
+                <p class="text-muted mb-4">¡Comienza a agregar productos increíbles!</p>
+                <a href="{% url 'core:catalogo' %}" class="btn nm-btn-primary btn-lg">
+                    <i class="fas fa-store me-2"></i>Ir al Catálogo
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+  window.CARRITO_CANTIDAD_URL = '{% url "carrito:cantidad_api" %}';
+</script>
+<script src="{% static 'js/ver_carrito.js' %}"></script>
+{% endblock %}
+{% endblock %}

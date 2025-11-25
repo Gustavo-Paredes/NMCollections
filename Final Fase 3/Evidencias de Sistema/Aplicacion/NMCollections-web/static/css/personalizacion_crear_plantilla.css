@@ -1,0 +1,55 @@
+/* Página: Crear Plantilla - ajustes visuales */
+.plantilla-wrapper {
+    background: var(--bg-panel, #ffffff);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+#imagePreview .preview-image {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.elemento-item {
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    position: relative;
+    background: #fff;
+}
+
+.btn-remove-element {
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    border: none;
+    background: transparent;
+    color: #dc3545;
+}
+
+.elemento-titulo {
+    margin: 0 0 0.5rem 0;
+}
+
+/* Make form controls full-width and consistent */
+.plantilla-wrapper .form-control {
+    background: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+    .plantilla-wrapper {
+        background: rgba(18,18,18,0.85);
+        color: #e6e6e6;
+    }
+    .plantilla-wrapper .bg-light {
+        background: transparent !important;
+    }
+    .elemento-item {
+        background: rgba(255,255,255,0.03);
+        border-color: rgba(255,255,255,0.04);
+    }
+}

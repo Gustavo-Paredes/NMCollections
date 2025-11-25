@@ -1,0 +1,182 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load formatting %}
+
+{% block title %}{{ producto.nombre }} - NM Collections{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/productos.css' %}">
+
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="producto-detalle">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="producto-galeria">
+                    <div class="galeria-contador">
+                        <span id="current-slide">1</span> / <span id="total-slides">{{ imagenes_extras_urls|length|add:1 }}</span>
+                    </div>
+                    
+                    <div class="galeria-container" id="galeria-container">
+                        <!-- Imagen principal -->
+                        <div class="galeria-slide">
+                            {% if imagen_principal_url %}
+                                <img src="{{ imagen_principal_url }}" alt="{{ producto.nombre }}">
+                            {% else %}
+                                <img src="{% static 'img/icons/no-image.png' %}" alt="Sin imagen">
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Imágenes adicionales -->
+                        {% for url in imagenes_extras_urls %}
+                        <div class="galeria-slide">
+                            <img src="{{ url }}" alt="{{ producto.nombre }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if imagenes_extras_urls %}
+                    <!-- Botones de navegación -->
+                    <button class="galeria-nav galeria-nav-prev" onclick="cambiarSlide(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="galeria-nav galeria-nav-next" onclick="cambiarSlide(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    
+                    <!-- Indicadores -->
+                    <div class="galeria-indicators" id="indicators">
+                        <span class="indicator active" onclick="irASlide(0)"></span>
+                        {% for url in imagenes_extras_urls %}
+                        <span class="indicator" onclick="irASlide({{ forloop.counter }})"></span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="producto-info">
+                    <h2 class="producto-title">{{ producto.nombre }}</h2>
+                    <p class="producto-categoria">{{ producto.categoria.nombre }}</p>
+                    <h4 class="producto-precio">$ {{ producto.precio_base|floatformat:0|intcomma }}</h4>
+                    
+                    <div class="producto-descripcion">
+                        {{ producto.descripcion|linebreaks }}
+                    </div>
+
+                    <div class="producto-metadata">
+                        <dl>
+                            {% if producto.stock is not None %}
+                            <dt>Stock disponible:</dt>
+                            <dd>{{ producto.stock }} unidades</dd>
+                            {% endif %}
+                            
+                            <dt>Tipo:</dt>
+                            <dd>{{ producto.get_tipo_display|default:producto.tipo|title }}</dd>
+                        </dl>
+                    </div>
+
+                    <div class="producto-actions">
+                        <!-- Formulario para agregar al carrito -->
+                        <form method="POST" action="{% url 'carrito:agregar' producto.id %}" class="mb-3">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-4">
+                                </div>
+                                <div class="col-8">
+                                    <button type="submit" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-cart-plus me-2"></i>Agregar al Carrito
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <button type="button" class="btn btn-carrito" data-bs-toggle="modal" data-bs-target="#modalCompraRapida{{ producto.id }}">
+                            <i class="fas fa-bolt me-2"></i>Comprar Ahora
+                        </button>
+                        <a href="{% url 'core:catalogo' %}" class="btn btn-volver">
+                            <i class="fas fa-arrow-left"></i> Volver al Catálogo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Compra Rápida -->
+{% include 'pedidos/modal_compra_rapida.html' with producto=producto %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let slideActual = 0;
+const totalSlides = {{ imagenes_extras_urls|length|add:1 }};
+
+function mostrarSlide(n) {
+    const container = document.getElementById('galeria-container');
+    const indicators = document.querySelectorAll('.indicator');
+    
+    if (n >= totalSlides) {
+        slideActual = 0;
+    } else if (n < 0) {
+        slideActual = totalSlides - 1;
+    } else {
+        slideActual = n;
+    }
+    
+    container.style.transform = `translateX(-${slideActual * 100}%)`;
+    
+    // Actualizar indicadores
+    indicators.forEach((indicator, index) => {
+        indicator.classList.toggle('active', index === slideActual);
+    });
+    
+    // Actualizar contador
+    document.getElementById('current-slide').textContent = slideActual + 1;
+}
+
+function cambiarSlide(direccion) {
+    mostrarSlide(slideActual + direccion);
+}
+
+function irASlide(n) {
+    mostrarSlide(n);
+}
+
+// Soporte para deslizar con el dedo (touch) en móviles
+let touchStartX = 0;
+let touchEndX = 0;
+
+const galeria = document.getElementById('galeria-container');
+if (galeria) {
+    galeria.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    galeria.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+}
+
+function handleSwipe() {
+    if (touchEndX < touchStartX - 50) {
+        cambiarSlide(1);
+    }
+    if (touchEndX > touchStartX + 50) {
+        cambiarSlide(-1);
+    }
+}
+
+// Soporte para teclado
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') cambiarSlide(-1);
+    if (e.key === 'ArrowRight') cambiarSlide(1);
+});
+</script>
+{% endblock %}

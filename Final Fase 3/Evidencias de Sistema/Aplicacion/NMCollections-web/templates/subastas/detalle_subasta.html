@@ -1,0 +1,315 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load formatting %}
+
+
+{% block title %}Detalle Subasta - {{ subasta.producto.nombre }}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/subastas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+        <div class="row g-4">
+                <div class="col-md-6">
+            <div class="subasta-card">
+                <div class="card-body">
+                    <div class="subasta-title text-center mb-3" style="font-size:1.5rem;">
+                        {{ subasta.producto.nombre }}
+                    </div>
+                    <p><strong>Descripción:</strong> {{ subasta.producto.descripcion }}</p>
+                    <p><strong>Precio inicial:</strong> $ {{ subasta.precio_inicial|floatformat:0|intcomma }}</p>
+                    
+                                        <p><strong>Precio actual:</strong> <span id="precio-actual-display">$ {{ subasta.precio_actual|floatformat:0|intcomma }}</span></p> 
+                    
+                    <p><strong>Estado:</strong> {{ subasta.get_estado_display }}</p>
+                    <p><strong>Fecha inicio:</strong> {{ subasta.fecha_inicio}}</p>
+                    <p><strong>Fecha fin:</strong> {{ subasta.fecha_fin}}</p>
+<li>
+
+                        <span 
+                            id="contador-tiempo"
+                            data-fecha-inicio="{{ subasta.fecha_inicio|date:'Y-m-d\TH:i:s' }}"
+                            data-fecha-fin="{{ subasta.fecha_fin|date:'Y-m-d\TH:i:s' }}"
+                        ></span>
+                    </li>
+
+                    {% if subasta.puja_ganadora and subasta.puja_ganadora.usuario == user and not subasta.esta_activa %}
+                    <div class="alert alert-success mt-3">
+                        <h5><i class="fas fa-trophy"></i> ¡Felicitaciones! Has ganado esta subasta</h5>
+                        <p class="mb-2">Monto ganador: <strong>$ {{ subasta.puja_ganadora.monto|floatformat:0|intcomma }}</strong></p>
+                        <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modalComprarSubasta{{ subasta.id }}">
+                            <i class="fas fa-shopping-cart"></i> Completar Compra con Transbank
+                        </button>
+                    </div>
+                    {% elif subasta.estado == 'activa' %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group mb-2">
+                            <label for="monto">Ingresar monto:</label>
+                            <input type="number" step="0" name="monto" class="form-control" placeholder="Monto de puja" required>
+                        </div>
+                        <button type="submit" class="subasta-btn btn w-100">Pujar</button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-warning mt-2">
+                        Esta subasta no está activa.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+                <div class="col-md-6 d-flex flex-column">
+            
+                        <div class="subasta-card mb-4 flex-fill">
+                <div class="card-body">
+                    <h5>Pujas realizadas</h5>
+                    <div id="pujas-en-vivo"> 
+                        {% if pujas %}
+                            <ul class="list-group">
+                                {% for puja in pujas %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ puja.usuario.first_name }} 
+                                        <span>$ {{ puja.monto|floatformat:0|intcomma }} - {{ puja.fecha|date:"d/m/Y H:i" }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p id="no-pujas-placeholder">Aún no hay pujas.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+                        <div class="subasta-card flex-fill">
+                <div class="card-body">
+                    <h5>Chat en vivo</h5>
+                    <div id="chat-box" class="chat-box-style">
+                        <p class="text-center text-muted m-0 p-2 text-white-50"><em>Aún no hay mensajes.</em></p>
+                    </div>
+                    <form id="chat-form" class="mt-2 d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="text" name="mensaje" class="form-control mb-2 chat-input-style" style="color: #fff;" placeholder="Escribe un mensaje..." required autocomplete="off">
+                        <button type="submit" class="btn subasta-btn w-100">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    <div class="mt-4">
+        <a href="{% url 'subastas:subasta' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver a subastas</a>
+    </div>
+</div>
+
+<!-- Modal de Compra de Subasta -->
+{% if subasta.puja_ganadora and subasta.puja_ganadora.usuario == user and not subasta.esta_activa %}
+    {% include 'pedidos/modal_comprar_subasta.html' with subasta=subasta %}
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const subastaId = "{{ subasta.id }}";
+const currentUsername = "{{ user.username|default:'Anonimo' }}";
+const csrfElem = document.querySelector('[name=csrfmiddlewaretoken]');
+const csrfToken = csrfElem ? csrfElem.value : '';
+
+const chatBox = document.getElementById('chat-box');
+const chatForm = document.getElementById('chat-form');
+const pujasEnVivoDiv = document.getElementById('pujas-en-vivo');
+const precioActualDisplay = document.getElementById('precio-actual-display');
+const contadorTiempo = document.getElementById('contador-tiempo');
+
+let intervaloContador;
+let intervaloActualizacion;
+
+function formatCLP(n) {
+    const num = Number(n);
+    if (Number.isNaN(num)) return n;
+    return new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 }).format(Math.round(num));
+}
+
+async function cargarPujas() {
+    try {
+        const resp = await fetch(`/subastas/api/${subastaId}/pujas/`);
+        const data = await resp.json();
+        if (!data || !data.success) return;
+        actualizarListaPujas(data.pujas);
+        if (precioActualDisplay) precioActualDisplay.textContent = '$ ' + formatCLP(data.precio_actual);
+
+        if (data.esta_activa === false) {
+            const botonPujar = document.querySelector('button[type="submit"]');
+            const inputMonto = document.querySelector('input[name="monto"]');
+            if (botonPujar) {
+                botonPujar.disabled = true;
+                botonPujar.textContent = "Subasta Finalizada";
+                botonPujar.classList.remove('subasta-btn');
+                botonPujar.classList.add('btn-secondary');
+            }
+            if (inputMonto) inputMonto.disabled = true;
+
+            const chatInput = chatForm.querySelector('input[name="mensaje"]');
+            const chatButton = chatForm.querySelector('button');
+            if (chatInput) { chatInput.disabled = true; chatInput.placeholder = "Chat cerrado"; }
+            if (chatButton) chatButton.disabled = true;
+        }
+    } catch (e) {
+        console.error('Error cargarPujas', e);
+    }
+}
+
+async function cargarMensajes() {
+    try {
+        const resp = await fetch(`/subastas/api/${subastaId}/mensajes/`);
+        const data = await resp.json();
+        if (data && data.success) mostrarMensajes(data.mensajes);
+    } catch (e) {
+        console.error('Error cargarMensajes', e);
+    }
+}
+
+function mostrarMensajes(mensajes) {
+    if (!chatBox) return;
+    chatBox.innerHTML = '';
+    if (!mensajes || mensajes.length === 0) {
+        chatBox.innerHTML = '<p class="text-center text-muted m-0 p-2 text-white-50"><em>Aún no hay mensajes.</em></p>';
+        return;
+    }
+    mensajes.forEach(msg => {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('chat-message');
+        const isSelf = msg.usuario === currentUsername;
+        messageDiv.classList.add(isSelf ? 'self' : 'other');
+        messageDiv.innerHTML = `
+            <small style="color: #00c853;">${msg.usuario}:</small>
+            <span style="color: #fff; display: block;">${msg.mensaje}</span>
+        `;
+        chatBox.appendChild(messageDiv);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function enviarMensaje(mensaje) {
+    try {
+        const formData = new FormData();
+        formData.append('mensaje', mensaje);
+        const resp = await fetch(`/subastas/api/${subastaId}/enviar-mensaje/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formData
+        });
+        const data = await resp.json();
+        return data;
+    } catch (e) {
+        console.error('Error enviarMensaje', e);
+        return { success: false, error: String(e) };
+    }
+}
+
+// Protecciones cliente: bandera y dedupe corto
+let sendingMessage = false;
+let lastSentMessage = null;
+let lastSentAt = 0;
+
+chatForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const mensajeInput = chatForm.querySelector('input[name="mensaje"]');
+    const sendButton = chatForm.querySelector('button[type="submit"]');
+    const mensaje = mensajeInput.value.trim();
+    if (!mensaje) return;
+    if (sendingMessage) return;
+    const now = Date.now();
+    if (mensaje === lastSentMessage && (now - lastSentAt) < 3000) return;
+
+    sendingMessage = true;
+    if (sendButton) sendButton.disabled = true;
+    mensajeInput.disabled = true;
+    lastSentMessage = mensaje; lastSentAt = now;
+
+    const result = await enviarMensaje(mensaje);
+    if (result && result.success) {
+        mensajeInput.value = '';
+        await cargarMensajes();
+    } else {
+        if (result && result.error === 'duplicate') {
+            console.warn('Mensaje duplicado descartado por servidor.');
+        } else {
+            console.error('Error al enviar mensaje:', result ? result.error : 'unknown');
+        }
+    }
+
+    sendingMessage = false;
+    if (sendButton) sendButton.disabled = false;
+    mensajeInput.disabled = false;
+});
+
+function actualizarListaPujas(pujas) {
+    if (!pujasEnVivoDiv) return;
+    pujasEnVivoDiv.innerHTML = '';
+    if (!pujas || pujas.length === 0) {
+        const p = document.createElement('p'); p.id = 'no-pujas-placeholder'; p.textContent = 'Aún no hay pujas.'; pujasEnVivoDiv.appendChild(p); return;
+    }
+    const ul = document.createElement('ul'); ul.classList.add('list-group');
+    pujas.forEach(puja => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.innerHTML = `<strong>${puja.usuario}</strong> <span>$ ${formatCLP(puja.monto)} - ${puja.fecha}</span>`;
+        ul.appendChild(li);
+    });
+    pujasEnVivoDiv.appendChild(ul);
+}
+
+function iniciarActualizaciones() {
+    cargarPujas(); cargarMensajes();
+    intervaloActualizacion = setInterval(() => { cargarPujas(); cargarMensajes(); }, 3000);
+}
+
+// Contador
+const fechaInicioStr = contadorTiempo ? contadorTiempo.getAttribute('data-fecha-inicio') : null;
+const fechaFinStr = contadorTiempo ? contadorTiempo.getAttribute('data-fecha-fin') : null;
+
+function actualizarContador() {
+    if (!contadorTiempo || !fechaInicioStr || !fechaFinStr) return;
+    const ahora = Date.now();
+    const inicio = new Date(fechaInicioStr).getTime();
+    const fin = new Date(fechaFinStr).getTime();
+    let tiempoRestante = 0; let mensaje = '';
+    if (ahora < inicio) { tiempoRestante = inicio - ahora; mensaje = '<strong>Empieza en:</strong> '; }
+    else if (ahora < fin) { tiempoRestante = fin - ahora; mensaje = '<strong>Termina en:</strong> '; }
+    else { mensaje = '<strong>Subasta Finalizada</strong>'; tiempoRestante = 0; clearInterval(intervaloContador); }
+
+    if (tiempoRestante > 0) {
+        const dias = Math.floor(tiempoRestante / 86400000);
+        const horas = Math.floor((tiempoRestante % 86400000) / 3600000);
+        const minutos = Math.floor((tiempoRestante % 3600000) / 60000);
+        const segundos = Math.floor((tiempoRestante % 60000) / 1000);
+        let tiempoStr = '';
+        if (dias>0) tiempoStr += `${dias}d `; if (horas>0) tiempoStr += `${horas}h `; tiempoStr += `${minutos}m ${segundos}s`;
+        contadorTiempo.innerHTML = mensaje + tiempoStr;
+    } else {
+        contadorTiempo.innerHTML = mensaje;
+        try {
+            const reloadKey = 'subasta_reloaded_' + subastaId;
+            if (!sessionStorage.getItem(reloadKey)) {
+                sessionStorage.setItem(reloadKey, '1');
+                setTimeout(() => {
+                    if (!document.hidden) { if (intervaloContador) clearInterval(intervaloContador); if (intervaloActualizacion) clearInterval(intervaloActualizacion); window.location.reload(); }
+                }, 1200);
+            }
+        } catch (e) {
+            setTimeout(() => { if (!document.hidden) { if (intervaloContador) clearInterval(intervaloContador); if (intervaloActualizacion) clearInterval(intervaloActualizacion); window.location.reload(); } }, 1200);
+        }
+    }
+}
+
+// Inicializar
+if (contadorTiempo && fechaInicioStr && fechaFinStr) { actualizarContador(); intervaloContador = setInterval(actualizarContador, 1000); }
+iniciarActualizaciones();
+
+window.addEventListener('beforeunload', () => { if (intervaloContador) clearInterval(intervaloContador); if (intervaloActualizacion) clearInterval(intervaloActualizacion); });
+</script>
+{% endblock %}
