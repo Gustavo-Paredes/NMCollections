@@ -1,0 +1,144 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load formatting %}
+
+{% block title %}NM Collections - Inicio{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/subastas.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container py-4">
+        <h4 class="mb-4 subasta-title text-center">Subastas activas</h4>
+        {% if subastas %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-6 g-3">
+            {% for subasta in subastas %}
+                <div class="col d-flex align-items-stretch">
+                    <div class="subasta-card w-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h5 class="subasta-title">{{ subasta.producto.nombre }}</h5>
+                            <ul class="list-unstyled small mb-3">
+                                <li><strong>Estado:</strong> <span class="subasta-estado">{{ subasta.get_estado_display }}</span></li>
+                                <li><strong>Precio inicial:</strong> <span class="subasta-precio">$ {{ subasta.precio_inicial|floatformat:0|intcomma }}</span></li>
+                                <li><strong>Fecha inicio:</strong> <span class="subasta-fecha">{{ subasta.fecha_inicio|date:'d/m/Y H:i' }}</span></li>
+                                <li><strong>Fecha fin:</strong> <span class="subasta-fecha">{{ subasta.fecha_fin|date:'d/m/Y H:i' }}</span></li>
+                                
+                                <li>
+                                    <strong>Tiempo:</strong> 
+                                    <span 
+                                        class="subasta-contador"
+                                        data-fecha-inicio="{{ subasta.fecha_inicio|date:'Y-m-d\TH:i:s' }}"
+                                        data-fecha-fin="{{ subasta.fecha_fin|date:'Y-m-d\TH:i:s' }}"
+                                    >
+                                        Cargando...
+                                    </span>
+                                </li>
+                                
+                            </ul>
+                            <a href="{% url 'subastas:detalle' subasta.id %}" class="subasta-btn btn btn-sm mt-auto w-100">Ver detalles</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="d-flex justify-content-center text-center" style="min-height: 50vh;">
+            <div style="color: white; text-align: center;">
+                <p style="font-size: 1.2rem; margin: 0;">No hay subastas disponibles.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+---
+
+{% block extra_js %}
+<script>
+// ===============================================
+// FUNCIÓN PRINCIPAL DE CONTADOR DE TIEMPO
+// ===============================================
+
+function calcularTiempo(elemento) {
+    const fechaInicioStr = elemento.getAttribute('data-fecha-inicio');
+    const fechaFinStr = elemento.getAttribute('data-fecha-fin');
+    
+    // Si faltan datos, detenemos
+    if (!fechaInicioStr || !fechaFinStr) {
+        elemento.textContent = 'Fechas no definidas.';
+        return;
+    }
+
+    const ahora = new Date().getTime();
+    const inicio = new Date(fechaInicioStr).getTime();
+    const fin = new Date(fechaFinStr).getTime();
+    
+    let tiempoRestante = 0;
+    let mensaje = "";
+    let subastaActiva = false;
+
+    if (ahora < inicio) {
+        // La subasta AÚN NO empieza
+        tiempoRestante = inicio - ahora;
+        mensaje = "Empieza en: ";
+        subastaActiva = false;
+    } else if (ahora < fin) {
+        // La subasta está ACTIVA
+        tiempoRestante = fin - ahora;
+        mensaje = "Termina en: ";
+        subastaActiva = true;
+    } else {
+        // La subasta TERMINÓ
+        mensaje = "Finalizada";
+        tiempoRestante = 0;
+        
+        // Detener la actualización para este elemento (la mejor práctica es usar Web Workers o Mapas)
+        // Pero para simplificar, simplemente no hacemos nada si tiempoRestante es 0
+    }
+
+    if (tiempoRestante > 0) {
+        // Cálculo del tiempo en días, horas, minutos y segundos
+        const dias = Math.floor(tiempoRestante / (1000 * 60 * 60 * 24));
+        const horas = Math.floor((tiempoRestante % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutos = Math.floor((tiempoRestante % (1000 * 60 * 60)) / (1000 * 60));
+        const segundos = Math.floor((tiempoRestante % (1000 * 60)) / 1000);
+
+        let tiempoStr = '';
+        if (dias > 0) tiempoStr += `${dias}d `;
+        if (horas > 0) tiempoStr += `${horas}h `;
+        tiempoStr += `${minutos}m ${segundos}s`;
+        
+        elemento.textContent = mensaje + tiempoStr;
+    } else {
+        elemento.textContent = mensaje;
+    }
+}
+
+// ===============================================
+// INICIO DEL PROCESO PARA MÚLTIPLES SUBASTAS
+// ===============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Obtener todos los elementos que tienen la clase 'subasta-contador'
+    const contadores = document.querySelectorAll('.subasta-contador');
+    
+    if (contadores.length > 0) {
+        // 2. Definir la función que actualiza todos los contadores
+        const actualizarTodosLosContadores = () => {
+            contadores.forEach(contador => {
+                calcularTiempo(contador);
+            });
+        };
+        
+        // 3. Ejecutar inmediatamente para mostrar el estado inicial
+        actualizarTodosLosContadores();
+        
+        // 4. Establecer un intervalo para actualizar cada segundo
+        setInterval(actualizarTodosLosContadores, 1000);
+    }
+});
+
+</script>
+{% endblock %}

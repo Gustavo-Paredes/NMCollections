@@ -1,0 +1,137 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load formatting %}
+
+{% block title %}Reportes de Ventas - NM Collections{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reporte.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="reporte-gestion">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h2 class="reporte-title mb-0">Reportes de Ventas</h2>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_csv }}" class="btn reporte-btn" target="reporte_export">
+                    <i class="fas fa-file-csv"></i> CSV
+                </a>
+                <a href="{{ url_excel }}" class="btn reporte-btn" target="reporte_export">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a href="{{ url_pdf }}" class="btn reporte-btn" target="reporte_export">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="reporte-card card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Ventas Totales</h5>
+                        <p class="reporte-precio mb-0">${{ metrics.total_ventas|floatformat:0|intcomma }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="reporte-card card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Pedidos Totales</h5>
+                        <p class="reporte-precio mb-0">{{ metrics.total_pedidos|floatformat:0|intcomma }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="reporte-card card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Pedidos Confirmados</h5>
+                        <p class="reporte-precio mb-0">{{ metrics.pedidos_confirmados|floatformat:0|intcomma }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Gráficos -->
+        <div class="row mt-5">
+            <div class="col-md-4 mb-4">
+                <div class="card bg-dark text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Ventas por Mes (último año)</h5>
+                        <canvas id="ventasMesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card bg-dark text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Pedidos por Estado</h5>
+                        <canvas id="pedidosEstadoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card bg-dark text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Ventas por Método de Pago</h5>
+                        <canvas id="ventasMetodoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Ventas por mes
+const ventasMesCtx = document.getElementById('ventasMesChart').getContext('2d');
+new Chart(ventasMesCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ labels_ventas_mes|safe }},
+        datasets: [{
+            label: 'Ventas ($)',
+            data: {{ ventas_por_mes|safe }},
+            backgroundColor: '#00ff88',
+            borderColor: '#00ff88',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+// Pedidos por estado
+const pedidosEstadoCtx = document.getElementById('pedidosEstadoChart').getContext('2d');
+new Chart(pedidosEstadoCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ pedidos_estado_labels|safe }},
+        datasets: [{
+            label: 'Pedidos',
+            data: {{ pedidos_estado_values|safe }},
+            backgroundColor: ['#00ff88', '#ff4444', '#3498db', '#f1c40f', '#8e44ad', '#e67e22']
+        }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } } }
+});
+// Ventas por método de pago
+const ventasMetodoCtx = document.getElementById('ventasMetodoChart').getContext('2d');
+new Chart(ventasMetodoCtx, {
+    type: 'pie',
+    data: {
+        labels: {{ ventas_metodo_labels|safe }},
+        datasets: [{
+            label: 'Ventas',
+            data: {{ ventas_metodo_values|safe }},
+            backgroundColor: ['#00ff88', '#3498db', '#f1c40f', '#8e44ad', '#e67e22', '#ff4444']
+        }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+{% endblock %}

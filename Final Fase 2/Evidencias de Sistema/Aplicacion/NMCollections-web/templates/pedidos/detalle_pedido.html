@@ -1,0 +1,300 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Detalle Pedido {{ pedido.numero_pedido }} - NM Collections{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/nm-dark-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/detalle_pedido.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-receipt me-2"></i>Pedido {{ pedido.numero_pedido }}</h2>
+        <a href="{% url 'pedidos:mis_pedidos' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Información del pedido -->
+        <div class="col-md-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Información del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Estado:</strong>
+                                <span class="status-badge status-{{ pedido.estado }}">{{ pedido.estado|capfirst }}</span>
+                            </p>
+                            <p><strong>Fecha Pedido:</strong> {{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</p>
+                            {% if pedido.fecha_confirmacion %}
+                            <p><strong>Fecha Confirmación:</strong> {{ pedido.fecha_confirmacion|date:"d/m/Y H:i" }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Método de Pago:</strong> {{ pedido.metodo_pago|upper }}</p>
+                            {% if pedido.numero_seguimiento %}
+                            <p><strong>Nº Seguimiento:</strong> {{ pedido.numero_seguimiento }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6><i class="fas fa-map-marker-alt me-2"></i>Dirección de Envío</h6>
+                    <p class="text-muted">{{ pedido.direccion_envio }}</p>
+                </div>
+            </div>
+
+            <!-- Productos del pedido -->
+            <div class="card shadow-sm mt-4 productos-card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Productos</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="productos-header">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unit.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in pedido.productos.all %}
+                                <tr>
+                                    <td class="align-middle">
+                                        <div class="d-flex flex-column gap-1">
+                                            <strong class="producto-nombre">{{ item.producto.nombre }}</strong>
+                                            {% if item.personalizacion %}
+                                                <div class="personalizacion-block">
+                                                    {% if item.personalizacion.imagen %}
+                                                        <div class="personalizacion-thumb">
+                                                            <img src="{{ item.personalizacion.imagen }}" alt="{{ item.personalizacion.nombre_carta|default:'Carta personalizada' }}" loading="lazy">
+                                                        </div>
+                                                    {% endif %}
+                                                    <div class="personalizacion-info">
+                                                        {% if item.carta_personalizada %}
+                                                            <span class="personalizacion-title"><i class="fas fa-palette me-1"></i>{{ item.carta_personalizada.nombre_carta }}</span>
+                                                        {% elif item.personalizacion.nombre_carta %}
+                                                            <span class="personalizacion-title"><i class="fas fa-palette me-1"></i>{{ item.personalizacion.nombre_carta }}</span>
+                                                        {% else %}
+                                                            <span class="personalizacion-title"><i class="fas fa-palette me-1"></i>Personalización aplicada</span>
+                                                        {% endif %}
+                                                        {% if item.personalizacion.parametros %}
+                                                            <small class="personalizacion-parametros text-muted">
+                                                                {% for param in item.personalizacion.parametros %}
+                                                                    {{ param.nombre }}: {{ param.valor }}{% if not forloop.last %}, {% endif %}
+                                                                {% endfor %}
+                                                            </small>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">{{ item.cantidad }}</td>
+                                    <td class="align-middle">${{ item.producto.precio_base|floatformat:0 }}</td>
+                                    <td class="text-end align-middle"><strong>${{ item.precio_total|floatformat:0 }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="productos-footer">
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong class="text-primary">${{ pedido.total|floatformat:0 }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de cambios (opcional) -->
+            {% with cambios=pedido.historial_cambios.all %}
+            {% if cambios %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Historial de Estados</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for cambio in cambios %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">{{ cambio.fecha|date:"d/m/Y H:i" }}</div>
+                            <div class="timeline-title">
+                                Estado cambiado a:
+                                <span class="status-badge status-{{ cambio.estado_nuevo }}">
+                                    {% if cambio.estado_nuevo == 'pendiente' %}Pendiente{% endif %}
+                                    {% if cambio.estado_nuevo == 'confirmado' %}Confirmado{% endif %}
+                                    {% if cambio.estado_nuevo == 'enviado' %}Enviado{% endif %}
+                                    {% if cambio.estado_nuevo == 'entregado' %}Entregado{% endif %}
+                                    {% if cambio.estado_nuevo == 'cancelado' %}Cancelado{% endif %}
+                                </span>
+                            </div>
+                            {% if cambio.notas %}
+                            <div class="timeline-notes text-muted">{{ cambio.notas }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Acciones -->
+            <div class="action-buttons mt-4">
+
+                <div class="d-flex flex-wrap gap-2">
+                    {% comment %} {% if pedido.estado == 'pendiente' %}
+                        <button class="btn btn-success btn-custom" onclick="cambiarEstado('confirmado')">
+                            <i class="fas fa-check"></i> Confirmar Pedido
+                        </button>
+                        <button class="btn btn-danger btn-custom" onclick="cambiarEstado('cancelado')">
+                            <i class="fas fa-times"></i> Cancelar Pedido
+                        </button>
+                    {% elif pedido.estado == 'confirmado' %}
+                        <button class="btn btn-info btn-custom" onclick="cambiarEstado('enviado')">
+                            <i class="fas fa-shipping-fast"></i> Marcar como Enviado
+                        </button>
+                        <button class="btn btn-danger btn-custom" onclick="cambiarEstado('cancelado')">
+                            <i class="fas fa-times"></i> Cancelar Pedido
+                        </button>
+                    {% elif pedido.estado == 'enviado' %}
+                        <button class="btn btn-success btn-custom" onclick="cambiarEstado('entregado')">
+                            <i class="fas fa-check-double"></i> Marcar como Entregado
+                        </button>
+                    {% endif %} {% endcomment %}
+
+                    <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-secondary btn-custom">
+                        <i class="fas fa-list"></i> Ver Todos los Pedidos
+                    </a>
+
+                    <button class="btn btn-primary btn-custom" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h3 class="text-primary mb-3">${{ pedido.total|floatformat:0 }}</h3>
+                    <p class="text-muted mb-3">Total del Pedido</p>
+                    {% if pedido.estado == 'enviado' and pedido.numero_seguimiento %}
+                    <a href="#" class="btn btn-info btn-sm w-100 mb-2">
+                        <i class="fas fa-truck me-2"></i>Rastrear Envío
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'core:catalogo' %}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-shopping-cart me-2"></i>Seguir Comprando
+                    </a>
+                </div>
+            </div>
+
+            <!-- Información de contacto -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-headset me-2"></i>¿Necesitas Ayuda?</h6>
+                    <p class="card-text text-muted small">Si tienes alguna pregunta sobre tu pedido, puedes contactarnos.</p>
+                    <a href="{% url 'soporte:mi_soporte' %}" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="fas fa-comments me-2"></i>Chat de Soporte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Confirmar Cambio de Estado -->
+    <div class="modal fade" id="confirmarCambioModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tituloModal">Confirmar Cambio de Estado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro de cambiar el estado a <strong id="nuevoEstado"></strong>?</p>
+                    <div class="mb-3">
+                        <label for="notasCambio" class="form-label">Notas (opcional)</label>
+                        <textarea class="form-control" id="notasCambio" rows="3" placeholder="Agregue notas sobre este cambio..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmarCambio">Confirmar Cambio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let estadoACambiar = '';
+
+    function cambiarEstado(nuevoEstado) {
+        estadoACambiar = nuevoEstado;
+        const estadoTexto = {
+            'confirmado': 'Confirmado',
+            'enviado': 'Enviado',
+            'entregado': 'Entregado',
+            'cancelado': 'Cancelado'
+        };
+        const titulosModales = {
+            'confirmado': 'Confirmar Pedido',
+            'enviado': 'Confirmar Envío',
+            'entregado': 'Confirmar Entrega',
+            'cancelado': 'Cancelar Pedido'
+        };
+
+        document.getElementById('nuevoEstado').textContent = estadoTexto[nuevoEstado] || '';
+        document.getElementById('tituloModal').textContent = titulosModales[nuevoEstado] || 'Confirmar Cambio de Estado';
+        new bootstrap.Modal(document.getElementById('confirmarCambioModal')).show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnConfirmar = document.getElementById('confirmarCambio');
+        if (btnConfirmar) {
+            btnConfirmar.addEventListener('click', function() {
+                const notas = document.getElementById('notasCambio').value;
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{% url "pedidos:cambiar_estado_pedido" pedido.id %}';
+
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = 'csrfmiddlewaretoken';
+                csrfToken.value = '{{ csrf_token }}';
+                form.appendChild(csrfToken);
+
+                const estado = document.createElement('input');
+                estado.type = 'hidden';
+                estado.name = 'nuevo_estado';
+                estado.value = estadoACambiar;
+                form.appendChild(estado);
+
+                const notasInput = document.createElement('input');
+                notasInput.type = 'hidden';
+                notasInput.name = 'notas';
+                notasInput.value = notas;
+                form.appendChild(notasInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            });
+        }
+    });
+</script>
+{% endblock %}

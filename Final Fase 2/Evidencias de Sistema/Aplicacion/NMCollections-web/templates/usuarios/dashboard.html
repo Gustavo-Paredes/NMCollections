@@ -1,0 +1,128 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - {{ user.first_name|default:user.username }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+
+    {% if user.is_staff %}
+    <!-- PANEL ADMIN -->
+    <div class="dashboard-main-card admin-section">
+        <div class="dashboard-header">
+            <h1>Panel de Administración</h1>
+            <p>Gestiona todos los aspectos de NM Collections</p>
+        </div>
+
+        <div class="dashboard-grid">
+
+            <div class="dashboard-card-inner admin-card">
+                <div class="dashboard-card-icon">📦</div>
+                <h3>Productos</h3>
+                <p>Gestionar catálogo</p>
+                <a href="{% url 'productos:gestionar' %}" class="btn-dashboard admin-btn">Gestionar Productos</a>
+            </div>
+
+            <!-- Panel Diseñador -->
+            <div class="dashboard-card-inner admin-card">
+                <div class="dashboard-card-icon">🎨</div>
+                <h3>Panel Diseñador</h3>
+                <p>Gestionar plantillas y elementos personalizados</p>
+                <a href="{% url 'personalizacion:panel_diseñador' %}" class="btn-dashboard admin-btn">Ir al Panel Diseñador</a>
+            </div>
+
+            <!-- Panel de Ventas -->
+            <div class="dashboard-card-inner admin-card">
+                <div class="dashboard-card-icon">🧾</div>
+                <h3>Pedidos</h3>
+                <p>Ver todos los pedidos</p>
+                <a href="{% url 'pedidos:panel_pedidos' %}" class="btn-dashboard admin-btn">Ver Pedidos</a>
+            </div>
+
+            <div class="dashboard-card-inner admin-card">
+                <div class="dashboard-card-icon">🔨</div>
+                <h3>Subastas</h3>
+                <p>Administrar subastas</p>
+                <a href="{% url 'subastas:admin_subastas' %}" class="btn-dashboard admin-btn">Gestionar Subastas</a>
+            </div>
+
+
+
+            <div class="dashboard-card-inner admin-card">
+                <div class="dashboard-card-icon">👥</div>
+                <h3>Usuarios</h3>
+                <p>Gestionar usuarios</p>
+                <a href="/admin/auth/user/" class="btn-dashboard admin-btn">Gestionar Usuarios</a>
+            </div>
+
+            <div class="dashboard-card-inner admin-card">
+                <div class="dashboard-card-icon">📊</div>
+                <h3>Reportes</h3>
+                <p>Ver métricas y descargar informes de ventas</p>
+                <a href="{% url 'pedidos:reportes_admin' %}" class="btn-dashboard admin-btn">Ir a Reportes</a>
+            </div>
+
+            <div class="dashboard-card-inner admin-card">
+                <div class="dashboard-card-icon">👤</div>
+                <h3>Mi Perfil</h3>
+                <p>Actualizar información personal</p>
+                <a href="{% url 'usuarios:profile' %}" class="btn-dashboard admin-btn">Editar Perfil</a>
+            </div>
+
+                        <!-- Soporte: Resumen -->
+            <div class="dashboard-card-inner admin-card">
+                <div class="dashboard-card-icon">💬</div>
+                <h3>Soporte</h3>
+                <p>Chatea con soporte</p>
+                <a href="{% url 'soporte:mi_soporte' %}" class="btn-dashboard">Abrir Chat</a>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- PANEL USUARIO -->
+    <div class="dashboard-main-card user-section">
+        <div class="dashboard-header">
+            <h1>¡Hola, {{ user.first_name|default:user.username }}!</h1>
+            <p>Bienvenido a tu panel de control de NM Collections</p>
+        </div>
+
+        <div class="dashboard-grid">
+
+            <div class="dashboard-card-inner">
+                <div class="dashboard-card-icon">👤</div>
+                <h3>Mi Perfil</h3>
+                <p>Actualizar información personal</p>
+                <a href="{% url 'usuarios:profile' %}" class="btn-dashboard">Editar Perfil</a>
+            </div>
+
+            <div class="dashboard-card-inner">
+                <div class="dashboard-card-icon">🛍️</div>
+                <h3>Mis Pedidos</h3>
+                <p>Ver historial de compras</p>
+                <a href="{% url 'pedidos:mis_pedidos' %}" class="btn-dashboard">Ver Pedidos</a>
+            </div>
+
+            <div class="dashboard-card-inner">
+                <div class="dashboard-card-icon">🏠</div>
+                <h3>Mis Direcciones</h3>
+                <p>Gestionar direcciones de envío</p>
+                <a href="{% url 'usuarios:addresses' %}" class="btn-dashboard">Ver Direcciones</a>
+            </div> 
+
+            <div class="dashboard-card-inner">
+                <div class="dashboard-card-icon">💬</div>
+                <h3>Soporte</h3>
+                <p>Chatea con soporte</p>
+                <a href="{% url 'soporte:mi_soporte' %}" class="btn-dashboard">Abrir Chat</a>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
