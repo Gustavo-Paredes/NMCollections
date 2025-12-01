@@ -1,1 +1,0 @@
-# Core app - funcionalidades básicas del sistema

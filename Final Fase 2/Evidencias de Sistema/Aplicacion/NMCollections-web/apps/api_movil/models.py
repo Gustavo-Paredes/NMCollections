@@ -1,1 +1,0 @@
-# Esta app no define modelos, solo centraliza serializers y views
